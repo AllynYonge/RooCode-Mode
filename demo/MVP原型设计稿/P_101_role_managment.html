@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色管理 - 原型</title>
+
+    <!-- Tailwind CSS v4 (必需) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- daisyUI v5 (必需) -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+
+    <!-- Lucide Icons (推荐图标库) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        html {
+            overflow-y: scroll;
+        }
+        
+        /* 权限树样式增强 */
+        .permission-tree {
+            --tree-indent: 1.5rem;
+        }
+        
+        .permission-node {
+            transition: all 0.2s ease-in-out;
+            border-radius: 0.5rem;
+            margin: 0.125rem 0;
+        }
+        
+        .permission-node:hover {
+            background-color: hsl(var(--b2));
+        }
+        
+        .permission-parent {
+            font-weight: 600;
+            background: linear-gradient(135deg, hsl(var(--b1)) 0%, hsl(var(--b2)) 100%);
+            border: 1px solid hsl(var(--b3));
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .permission-children {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+            margin-top: 0.5rem;
+            margin-left: var(--tree-indent);
+            position: relative;
+        }
+        
+        .permission-children.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+        }
+        
+        .permission-children::before {
+            content: '';
+            position: absolute;
+            left: -0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, hsl(var(--b3)), transparent);
+            border-radius: 1px;
+        }
+        
+        .expand-toggle {
+            transition: transform 0.2s ease-in-out;
+            color: hsl(var(--bc));
+        }
+        
+        .expand-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        .permission-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+        
+        .permission-item {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+        
+        .permission-item:hover {
+            background-color: hsl(var(--b2));
+            border-left-color: hsl(var(--p));
+        }
+        
+        /* 复选框样式增强 */
+        .checkbox-enhanced {
+            transition: all 0.15s ease-in-out;
+        }
+        
+        .checkbox-enhanced:hover {
+        }
+        
+        /* 角色列表样式增强 */
+        .role-item {
+            transition: all 0.2s ease-in-out;
+            border-radius: 0.75rem;
+            margin: 0.25rem 0;
+            border: 2px solid transparent;
+        }
+        
+        .role-item:hover {
+            border-color: hsl(var(--p) / 0.3);
+            background: linear-gradient(135deg, hsl(var(--b1)) 0%, hsl(var(--b2)) 100%);
+            transform: translateX(0.25rem);
+        }
+        
+        .role-item.active {
+            background: linear-gradient(135deg, hsl(var(--p) / 0.1) 0%, hsl(var(--p) / 0.05) 100%);
+            border-color: hsl(var(--p));
+            box-shadow: 0 4px 12px hsl(var(--p) / 0.15);
+        }
+        
+        /* 微妙动效 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(1rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        /* 状态指示器 */
+        .status-indicator {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        .status-indicator.all-selected {
+            background-color: hsl(var(--su));
+        }
+        
+        .status-indicator.partial-selected {
+            background: conic-gradient(hsl(var(--su)) 50%, hsl(var(--b3)) 50%);
+        }
+        
+        .status-indicator.none-selected {
+            background-color: hsl(var(--b3));
+        }
+    </style>
+</head>
+
+<body class="bg-base-200 font-sans">
+
+    <!-- 主布局容器 -->
+    <div class="flex h-screen">
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <main class="p-4 sm:p-6 lg:p-8 flex-1">
+
+                <!-- 页面头部 -->
+                <header class="mb-6">
+                    <!-- 面包屑导航 -->
+                    <div class="text-sm breadcrumbs mb-2">
+                        <ul>
+                            <li><a><i data-lucide="home" class="w-4 h-4 mr-1"></i>主页</a></li>
+                            <li><a><i data-lucide="settings" class="w-4 h-4 mr-1"></i>系统设置</a></li>
+                            <li><span class="font-semibold"><i data-lucide="shield" class="w-4 h-4 mr-1"></i>角色管理</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- 标题与操作区 -->
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
+                            <span>🛡️</span>
+                            角色管理
+                        </h1>
+                        
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <button class="btn btn-primary" onclick="new_role_modal.showModal()">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                新建角色
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- 两栏式布局容器 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- 左栏: 角色列表 -->
+                    <div class="lg:col-span-1 bg-base-100 p-6 rounded-box shadow">
+                        <h2 class="text-lg font-bold mb-4">角色列表 📜</h2>
+                        <label class="input input-bordered flex items-center gap-2 mb-4">
+                            <input type="text" class="grow" placeholder="搜索角色..." />
+                            <i data-lucide="search" class="w-4 h-4 opacity-70"></i>
+                        </label>
+                        <div class="space-y-1">
+                            <div class="role-item active animate-fade-in-up" onclick="selectRole('knowledge-a-admin', this)">
+                                <div class="flex items-center p-3 cursor-pointer">
+                                    <i data-lucide="shield-check" class="w-5 h-5 text-base-content/60 mr-3"></i>
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-base-content">知识库管理员</div>
+                                        <div class="text-xs text-base-content/60 mt-1">管理知识库的所有内容</div>
+                                    </div>
+                                    <span class="permission-badge bg-neutral/10 text-neutral">自定义</span>
+                                </div>
+                            </div>
+                            
+                            <div class="role-item animate-fade-in-up" style="animation-delay: 0.1s" onclick="selectRole('knowledge-b-operator', this)">
+                                <div class="flex items-center p-3 cursor-pointer">
+                                    <i data-lucide="shield" class="w-5 h-5 text-base-content/60 mr-3"></i>
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-base-content">知识库运营专员</div>
+                                        <div class="text-xs text-base-content/60 mt-1">负责知识库的日常运营</div>
+                                    </div>
+                                    <span class="permission-badge bg-neutral/10 text-neutral">自定义</span>
+                                </div>
+                            </div>
+                            
+                            <div class="divider my-4">
+                                <span class="text-sm font-medium text-base-content/70">内置角色</span>
+                            </div>
+                            
+                            <div class="role-item animate-fade-in-up" style="animation-delay: 0.2s" onclick="selectRole('system-admin', this)">
+                                <div class="flex items-center p-3 cursor-pointer">
+                                    <i data-lucide="user-cog" class="w-5 h-5 text-base-content/60 mr-3"></i>
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-base-content">系统管理员</div>
+                                        <div class="text-xs text-base-content/60 mt-1">拥有系统的完全访问权限</div>
+                                    </div>
+                                    <span class="permission-badge bg-neutral/10 text-neutral">内置</span>
+                                </div>
+                            </div>
+                            
+                            <div class="role-item animate-fade-in-up" style="animation-delay: 0.3s" onclick="selectRole('regular-member', this)">
+                                <div class="flex items-center p-3 cursor-pointer">
+                                    <i data-lucide="user" class="w-5 h-5 text-base-content/60 mr-3"></i>
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-base-content">普通成员</div>
+                                        <div class="text-xs text-base-content/60 mt-1">基础的查看和使用权限</div>
+                                    </div>
+                                    <span class="permission-badge bg-neutral/10 text-neutral">内置</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右栏: 权限配置 -->
+                    <div class="lg:col-span-2 bg-base-100 p-6 rounded-box shadow">
+                        <div class="flex justify-between items-center mb-4">
+                             <h2 class="text-lg font-bold">"知识库管理员"的权限配置 ⚙️</h2>
+                             <button class="btn btn-sm btn-ghost text-error">
+                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                 删除角色
+                             </button>
+                        </div>
+                       
+                        <div class="permission-tree space-y-3">
+                            <!-- 知识库模块权限组 -->
+                            <div class="permission-parent">
+                                <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('knowledge-module')">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="chevron-down" class="w-4 h-4 expand-toggle" id="toggle-knowledge-module"></i>
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" checked="checked" class="checkbox checkbox-primary checkbox-enhanced"
+                                                   onchange="handleParentPermissionChange('knowledge-module', this)" />
+                                            <span class="font-semibold text-base-content">📚 知识库模块</span>
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="status-indicator all-selected"></span>
+                                        <span class="text-xs text-success font-medium">全选</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="permission-children" id="children-knowledge-module">
+                                    <!-- 知识库管理子权限组 -->
+                                    <div class="permission-parent" style="margin-left: 1rem;">
+                                        <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('knowledge-management')">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-knowledge-management"></i>
+                                                <label class="cursor-pointer flex items-center gap-2">
+                                                    <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced checkbox-indeterminate"
+                                                           onchange="handleSubParentPermissionChange('knowledge-management', this)" />
+                                                    <span class="font-semibold text-base-content">🗂️ 知识库管理</span>
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="status-indicator partial-selected"></span>
+                                                <span class="text-xs text-warning font-medium">部分选中</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="permission-children collapsed" id="children-knowledge-management">
+                                            <div class="space-y-2">
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" checked="checked" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('knowledge-management')" />
+                                                        <span class="text-sm">查看知识库</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">允许用户浏览和搜索知识库内容</span>
+                                                    </label>
+                                                </div>
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" checked="checked" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('knowledge-management')" />
+                                                        <span class="text-sm">上传文档</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">允许用户向知识库中添加新的文档</span>
+                                                    </label>
+                                                </div>
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('knowledge-management')" />
+                                                        <span class="text-sm">删除知识库</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">将永久删除整个知识库及其所有内容</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 文档管理子权限组 -->
+                                    <div class="permission-parent" style="margin-left: 1rem;">
+                                        <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('document-management')">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-document-management"></i>
+                                                <label class="cursor-pointer flex items-center gap-2">
+                                                    <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced checkbox-indeterminate"
+                                                           onchange="handleSubParentPermissionChange('document-management', this)" />
+                                                    <span class="font-semibold text-base-content">📄 文档管理</span>
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="status-indicator partial-selected"></span>
+                                                <span class="text-xs text-warning font-medium">部分选中</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="permission-children collapsed" id="children-document-management">
+                                            <div class="space-y-2">
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" checked="checked" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('document-management')" />
+                                                        <span class="text-sm">查看文档</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">允许用户阅读文档的全部内容</span>
+                                                    </label>
+                                                </div>
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('document-management')" />
+                                                        <span class="text-sm">编辑文档</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">允许用户修改文档的标题和内容</span>
+                                                    </label>
+                                                </div>
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('document-management')" />
+                                                        <span class="text-sm">删除文档</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">将永久删除该文档及其所有知识条目</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 知识块管理子权限组 -->
+                                    <div class="permission-parent" style="margin-left: 1rem;">
+                                        <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('knowledge-block-management')">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-knowledge-block-management"></i>
+                                                <label class="cursor-pointer flex items-center gap-2">
+                                                    <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced"
+                                                           onchange="handleSubParentPermissionChange('knowledge-block-management', this)" />
+                                                    <span class="font-semibold text-base-content">🧩 知识块管理</span>
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="status-indicator none-selected"></span>
+                                                <span class="text-xs text-base-content/50 font-medium">未选</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="permission-children collapsed" id="children-knowledge-block-management">
+                                            <div class="space-y-2">
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('knowledge-block-management')" />
+                                                        <span class="text-sm">查看知识块</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">允许用户查看知识块的内容</span>
+                                                    </label>
+                                                </div>
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('knowledge-block-management')" />
+                                                        <span class="text-sm">创建知识块</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">允许用户在文档中新增知识块</span>
+                                                    </label>
+                                                </div>
+                                                <div class="permission-item">
+                                                    <label class="cursor-pointer flex items-center gap-2">
+                                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                               onchange="handleChildPermissionChange('knowledge-block-management')" />
+                                                        <span class="text-sm">编辑知识块</span>
+                                                        <span class="text-xs text-base-content/50 ml-auto">允许对文档中的知识块进行编辑</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Prompt 工程权限组 -->
+                            <div class="permission-parent">
+                            <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('prompt-engineering')">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-prompt-engineering"></i>
+                                    <label class="cursor-pointer flex items-center gap-2">
+                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced checkbox-indeterminate"
+                                               onchange="handleParentPermissionChange('prompt-engineering', this)" />
+                                        <span class="font-semibold text-base-content">🎯 Prompt 工程</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="status-indicator partial-selected"></span>
+                                    <span class="text-xs text-warning font-medium">部分选中</span>
+                                </div>
+                            </div>
+                            
+                            <div class="permission-children collapsed" id="children-prompt-engineering">
+                                <div class="space-y-2">
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" checked="checked" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('prompt-engineering')" />
+                                            <span class="text-sm">Prompt 开发</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许创建和编辑 Prompt 模板</span>
+                                        </label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('prompt-engineering')" />
+                                            <span class="text-sm">Playground</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许在 Playground 中测试 Prompt</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 评测权限组 -->
+                        <div class="permission-parent">
+                            <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('evaluation')">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-evaluation"></i>
+                                    <label class="cursor-pointer flex items-center gap-2">
+                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced"
+                                               onchange="handleParentPermissionChange('evaluation', this)" />
+                                        <span class="font-semibold text-base-content">📊 评测</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="status-indicator none-selected"></span>
+                                    <span class="text-xs text-base-content/50 font-medium">未选</span>
+                                </div>
+                            </div>
+                            
+                            <div class="permission-children collapsed" id="children-evaluation">
+                                <div class="space-y-2">
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('evaluation')" />
+                                            <span class="text-sm">评测集</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许创建和管理评测数据集</span>
+                                        </label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('evaluation')" />
+                                            <span class="text-sm">评估器</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许配置和使用评估器</span>
+                                        </label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('evaluation')" />
+                                            <span class="text-sm">实验</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许创建和运行评测实验</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 观测权限组 -->
+                        <div class="permission-parent">
+                            <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('observability')">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-observability"></i>
+                                    <label class="cursor-pointer flex items-center gap-2">
+                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced"
+                                               onchange="handleParentPermissionChange('observability', this)" />
+                                        <span class="font-semibold text-base-content">👁️ 观测</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="status-indicator none-selected"></span>
+                                    <span class="text-xs text-base-content/50 font-medium">未选</span>
+                                </div>
+                            </div>
+                            
+                            <div class="permission-children collapsed" id="children-observability">
+                                <div class="space-y-2">
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('observability')" />
+                                            <span class="text-sm">Trace</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许查看系统调用链路追踪</span>
+                                        </label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('observability')" />
+                                            <span class="text-sm">统计</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许查看系统使用统计数据</span>
+                                        </label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('observability')" />
+                                            <span class="text-sm">自动化任务</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许创建和管理自动化任务</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 模型权限组 -->
+                        <div class="permission-parent">
+                            <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('model')">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-model"></i>
+                                    <label class="cursor-pointer flex items-center gap-2">
+                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced"
+                                               onchange="handleParentPermissionChange('model', this)" />
+                                        <span class="font-semibold text-base-content">🤖 模型</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="status-indicator none-selected"></span>
+                                    <span class="text-xs text-base-content/50 font-medium">未选</span>
+                                </div>
+                            </div>
+                            
+                            <div class="permission-children collapsed" id="children-model">
+                                <div class="space-y-2">
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('model')" />
+                                            <span class="text-sm">模型管理</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许配置和管理AI模型</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MCP权限组 -->
+                        <div class="permission-parent">
+                            <div class="flex items-center justify-between cursor-pointer" onclick="togglePermissionGroup('mcp')">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 expand-toggle collapsed" id="toggle-mcp"></i>
+                                    <label class="cursor-pointer flex items-center gap-2">
+                                        <input type="checkbox" class="checkbox checkbox-primary checkbox-enhanced"
+                                               onchange="handleParentPermissionChange('mcp', this)" />
+                                        <span class="font-semibold text-base-content">🔌 MCP</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="status-indicator none-selected"></span>
+                                    <span class="text-xs text-base-content/50 font-medium">未选</span>
+                                </div>
+                            </div>
+                            
+                            <div class="permission-children collapsed" id="children-mcp">
+                                <div class="space-y-2">
+                                    <div class="permission-item">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                                                   onchange="handleChildPermissionChange('mcp')" />
+                                            <span class="text-sm">MCP服务</span>
+                                            <span class="text-xs text-base-content/50 ml-auto">允许配置和管理MCP服务</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 新建角色 Modal -->
+    <dialog id="new_role_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5"></i>新建角色</h3>
+            <form class="py-4 space-y-4">
+                <div>
+                    <label class="label">
+                        <span class="label-text">角色名称</span>
+                    </label>
+                    <input type="text" placeholder="例如：市场部专员" class="input input-bordered w-full" />
+                </div>
+                <div>
+                    <label class="label">
+                        <span class="label-text">描述 (可选)</span>
+                    </label>
+                    <textarea class="textarea textarea-bordered w-full" rows="3" placeholder="简要描述这个角色的职责"></textarea>
+                </div>
+            </form>
+            <div class="modal-action">
+                <form method="dialog" class="w-full flex justify-end gap-2">
+                    <button class="btn btn-ghost">取消</button>
+                    <button class="btn btn-primary">创建</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>关闭</button></form>
+    </dialog>
+
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+        
+        // 角色选择功能
+        function selectRole(roleId, element) {
+            // 移除所有角色的active状态
+            document.querySelectorAll('.role-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 添加当前选中角色的active状态
+            element.classList.add('active');
+            
+            // 更新权限配置标题
+            const roleNames = {
+                'knowledge-a-admin': '知识库管理员',
+                'knowledge-b-operator': '知识库运营专员',
+                'system-admin': '系统管理员',
+                'regular-member': '普通成员'
+            };
+            
+            const titleElement = document.querySelector('.lg\\:col-span-2 h2');
+            if (titleElement) {
+                titleElement.innerHTML = `"${roleNames[roleId]}"的权限配置 ⚙️`;
+            }
+            
+            // 模拟加载不同角色的权限配置
+            loadRolePermissions(roleId);
+        }
+        
+        // 权限组展开/折叠功能
+        function togglePermissionGroup(groupId) {
+            const toggle = document.getElementById(`toggle-${groupId}`);
+            const children = document.getElementById(`children-${groupId}`);
+            
+            if (children.classList.contains('collapsed')) {
+                // 展开
+                children.classList.remove('collapsed');
+                toggle.classList.remove('collapsed');
+                toggle.setAttribute('data-lucide', 'chevron-down');
+            } else {
+                // 折叠
+                children.classList.add('collapsed');
+                toggle.classList.add('collapsed');
+                toggle.setAttribute('data-lucide', 'chevron-right');
+            }
+            
+            // 重新创建图标
+            lucide.createIcons();
+        }
+        
+        // 父权限变化处理（顶级权限组）
+        function handleParentPermissionChange(groupId, checkbox) {
+            const children = document.querySelectorAll(`#children-${groupId} input[type="checkbox"]`);
+            const isChecked = checkbox.checked;
+            
+            // 设置所有子权限的状态
+            children.forEach(child => {
+                child.checked = isChecked;
+            });
+            
+            // 更新状态指示器
+            updatePermissionStatus(groupId);
+            
+            // 显示保存提示
+            showSaveNotification();
+        }
+        
+        // 子权限组父权限变化处理（二级权限组）
+        function handleSubParentPermissionChange(groupId, checkbox) {
+            const children = document.querySelectorAll(`#children-${groupId} input[type="checkbox"]`);
+            const isChecked = checkbox.checked;
+            
+            // 设置所有子权限的状态
+            children.forEach(child => {
+                child.checked = isChecked;
+            });
+            
+            // 更新状态指示器
+            updatePermissionStatus(groupId);
+            
+            // 更新知识库模块的状态
+            updateKnowledgeModuleStatus();
+            
+            // 显示保存提示
+            showSaveNotification();
+        }
+        
+        // 子权限变化处理
+        function handleChildPermissionChange(groupId) {
+            const parentCheckbox = document.querySelector(`#toggle-${groupId}`).parentElement.querySelector('input[type="checkbox"]');
+            const children = document.querySelectorAll(`#children-${groupId} input[type="checkbox"]`);
+            
+            const checkedChildren = Array.from(children).filter(child => child.checked);
+            const totalChildren = children.length;
+            const checkedCount = checkedChildren.length;
+            
+            // 更新父权限状态
+            if (checkedCount === 0) {
+                parentCheckbox.checked = false;
+                parentCheckbox.indeterminate = false;
+            } else if (checkedCount === totalChildren) {
+                parentCheckbox.checked = true;
+                parentCheckbox.indeterminate = false;
+            } else {
+                parentCheckbox.checked = false;
+                parentCheckbox.indeterminate = true;
+            }
+            
+            // 更新状态指示器
+            updatePermissionStatus(groupId);
+            
+            // 如果是知识库模块下的子权限，更新知识库模块状态
+            if (['knowledge-management', 'document-management', 'knowledge-block-management'].includes(groupId)) {
+                updateKnowledgeModuleStatus();
+            }
+            
+            // 显示保存提示
+            showSaveNotification();
+        }
+        
+        // 更新知识库模块状态
+        function updateKnowledgeModuleStatus() {
+            const knowledgeModuleCheckbox = document.querySelector('#toggle-knowledge-module').parentElement.querySelector('input[type="checkbox"]');
+            const subGroups = ['knowledge-management', 'document-management', 'knowledge-block-management'];
+            
+            let totalChecked = 0;
+            let totalItems = 0;
+            
+            subGroups.forEach(groupId => {
+                const children = document.querySelectorAll(`#children-${groupId} input[type="checkbox"]`);
+                const checkedChildren = Array.from(children).filter(child => child.checked);
+                totalChecked += checkedChildren.length;
+                totalItems += children.length;
+            });
+            
+            // 更新知识库模块父权限状态
+            if (totalChecked === 0) {
+                knowledgeModuleCheckbox.checked = false;
+                knowledgeModuleCheckbox.indeterminate = false;
+            } else if (totalChecked === totalItems) {
+                knowledgeModuleCheckbox.checked = true;
+                knowledgeModuleCheckbox.indeterminate = false;
+            } else {
+                knowledgeModuleCheckbox.checked = false;
+                knowledgeModuleCheckbox.indeterminate = true;
+            }
+            
+            // 更新知识库模块状态指示器
+            updatePermissionStatus('knowledge-module');
+        }
+        
+        // 更新权限状态指示器
+        function updatePermissionStatus(groupId) {
+            const children = document.querySelectorAll(`#children-${groupId} input[type="checkbox"]`);
+            const checkedChildren = Array.from(children).filter(child => child.checked);
+            const statusIndicator = document.querySelector(`#toggle-${groupId}`).closest('.permission-parent').querySelector('.status-indicator');
+            const statusText = statusIndicator.nextElementSibling;
+            
+            const checkedCount = checkedChildren.length;
+            const totalCount = children.length;
+            
+            if (checkedCount === 0) {
+                statusIndicator.className = 'status-indicator none-selected';
+                statusText.textContent = '未选';
+                statusText.className = 'text-xs text-base-content/50 font-medium';
+            } else if (checkedCount === totalCount) {
+                statusIndicator.className = 'status-indicator all-selected';
+                statusText.textContent = '全选';
+                statusText.className = 'text-xs text-success font-medium';
+            } else {
+                statusIndicator.className = 'status-indicator partial-selected';
+                statusText.textContent = '部分选中';
+                statusText.className = 'text-xs text-warning font-medium';
+            }
+        }
+        
+        // 显示保存通知
+        function showSaveNotification() {
+            // 创建临时通知
+            const notification = document.createElement('div');
+            notification.className = 'toast toast-top toast-end';
+            notification.innerHTML = `
+                <div class="alert alert-success">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    <span>权限已自动保存</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            lucide.createIcons();
+            
+            // 3秒后移除通知
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // 加载角色权限配置（模拟不同角色的权限）
+        function loadRolePermissions(roleId) {
+            // 这里可以根据不同角色设置不同的权限状态
+            // 为了演示，我们保持当前的权限配置不变
+            console.log(`Loading permissions for role: ${roleId}`);
+        }
+        
+        // 搜索功能
+        function setupSearch() {
+            const searchInput = document.querySelector('input[placeholder="搜索角色..."]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const roleItems = document.querySelectorAll('.role-item');
+                    
+                    roleItems.forEach(item => {
+                        const roleName = item.querySelector('.font-semibold').textContent.toLowerCase();
+                        const roleDesc = item.querySelector('.text-xs').textContent.toLowerCase();
+                        
+                        if (roleName.includes(searchTerm) || roleDesc.includes(searchTerm)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化搜索功能
+            setupSearch();
+            
+            // 初始化权限状态
+            updatePermissionStatus('knowledge-base');
+            updatePermissionStatus('document');
+            updatePermissionStatus('knowledge-item');
+            updatePermissionStatus('prompt-engineering');
+            updatePermissionStatus('evaluation');
+            updatePermissionStatus('observability');
+            updatePermissionStatus('model');
+            updatePermissionStatus('mcp');
+        });
+    </script>
+
+</body>
+</html>

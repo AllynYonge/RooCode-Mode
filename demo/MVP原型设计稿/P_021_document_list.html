@@ -1,0 +1,818 @@
+<!-- START: P_021_document_list.html -->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P_021 - 文档列表页</title>
+  <!-- Tailwind CSS & daisyUI -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* 解决滚动条间隙问题 */
+    html { overflow-y: scroll; }
+    /* 开发者注释按钮的自定义样式 */
+    .dev-note-btn {
+      position: absolute;
+      transform: translate(50%, -50%); /* 微调位置使其在元素角上 */
+    }
+    /* 批量操作栏的平滑过渡 */
+    #batchActionBar {
+      transition: all 0.3s ease-in-out;
+    }
+    /* 修复中文文本纵向显示问题 */
+    .dropdown-content li a {
+      word-wrap: normal;
+      word-break: keep-all;
+      white-space: nowrap;
+      min-width: max-content;
+    }
+    .dropdown-content {
+      max-width: none;
+    }
+  </style>
+</head>
+<body class="bg-base-200 font-sans">
+
+  <div class="p-4 sm:p-6 md:p-8 min-h-screen">
+    <div class="max-w-full mx-auto">
+
+      <!-- 页面头部 -->
+      <header class="mb-6">
+        <div class="text-sm breadcrumbs">
+          <ul>
+            <li><a>🍞 知识库</a></li>
+            <li><a>📘 产品A手册</a></li>
+          </ul>
+        </div>
+        <h1 class="text-3xl font-bold text-base-content mt-2">📘 产品A手册</h1>
+      </header>
+
+      <!-- 操作与搜索栏 -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div class="form-control w-full md:w-auto md:max-w-xs">
+          <label class="input input-bordered flex items-center gap-2">
+            <input type="text" id="searchInput" class="grow" placeholder="按文档名称搜索..." onkeyup="searchDocuments()" />
+            <i data-lucide="search" class="w-4 h-4 opacity-70"></i>
+          </label>
+        </div>
+        <div class="relative w-full md:w-auto">
+          <button class="btn btn-neutral w-full md:w-auto" onclick="triggerFileUpload('new')">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            上传文档
+          </button>
+          <button class="btn btn-xs btn-circle btn-ghost dev-note-btn shadow-lg hover:scale-110 transition-transform" style="top:0; right:0;" onclick="showDeveloperNote('note_upload_process', 'Note #1: 文档上传与解析流程')">1</button>
+        </div>
+      </div>
+
+      <!-- 批量操作栏 (动态显示) -->
+      <div id="batchActionBar" class="bg-base-100 p-2 rounded-lg shadow-md mb-4 flex items-center gap-4 transform scale-95 opacity-0 -translate-y-2 hidden">
+        <span class="font-bold text-sm ml-2"><span id="selectedCount">0</span> 已选择</span>
+        <div class="divider divider-horizontal"></div>
+        <button class="btn btn-sm btn-ghost" onclick="batchEnableDocuments()">
+          <i data-lucide="check-circle" class="w-4 h-4 text-success"></i>启用
+        </button>
+        <button class="btn btn-sm btn-ghost" onclick="batchDisableDocuments()">
+          <i data-lucide="x-circle" class="w-4 h-4 text-warning"></i>禁用
+        </button>
+        <button class="btn btn-sm btn-ghost" onclick="batchDeleteDocuments()">
+          <i data-lucide="trash-2" class="w-4 h-4 text-error"></i>删除
+        </button>
+        <div class="flex-grow"></div>
+        <button class="btn btn-sm btn-ghost" onclick="clearSelection()">取消</button>
+        <div class="absolute top-2 right-2">
+          <button class="btn btn-xs btn-circle btn-accent shadow-lg hover:scale-110 transition-transform" onclick="showDeveloperNote('note_batch_operations', 'Note #2: 批量操作的健壮性')">2</button>
+        </div>
+      </div>
+
+      <!-- 文档列表表格 -->
+      <div class="bg-base-100 shadow-md rounded-lg overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th><label><input type="checkbox" id="selectAllCheckbox" class="checkbox" onchange="toggleSelectAll()" /></label></th>
+              <th class="cursor-pointer hover:bg-base-200" onclick="sortTable('name')">
+                文档名称
+                <i id="sort-name" data-lucide="chevron-down" class="w-4 h-4 inline ml-1 opacity-50"></i>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" onclick="sortTable('status')">
+                状态
+                <i id="sort-status" data-lucide="chevron-down" class="w-4 h-4 inline ml-1 opacity-50"></i>
+              </th>
+              <th class="text-center">快速启用/禁用</th>
+              <th class="text-center cursor-pointer hover:bg-base-200" onclick="sortTable('items')">
+                🧩 知识条目数
+                <i id="sort-items" data-lucide="chevron-down" class="w-4 h-4 inline ml-1 opacity-50"></i>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" onclick="sortTable('upload')">
+                🕒 上传时间
+                <i id="sort-upload" data-lucide="chevron-down" class="w-4 h-4 inline ml-1 opacity-50"></i>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" onclick="sortTable('update')">
+                🕒 最后更新
+                <i id="sort-update" data-lucide="chevron-down" class="w-4 h-4 inline ml-1 opacity-50"></i>
+              </th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 示例行 1: 已启用 -->
+            <tr data-doc-id="doc_001" data-status="enabled">
+              <td><label><input type="checkbox" class="checkbox document-checkbox" data-doc-id="doc_001" onchange="handleDocumentSelection()" /></label></td>
+              <td><a href="./P_022_knowledge_item_list.html" class="link link-hover font-medium flex items-center gap-2">➡️ 安装指南.md</a></td>
+              <td><div class="badge badge-success badge-outline gap-1">已启用</div></td>
+              <td class="text-center"><input type="checkbox" class="toggle toggle-success" checked onchange="toggleDocumentStatus('doc_001', this)" /></td>
+              <td class="text-center">150</td>
+              <td>3天前</td>
+              <td>2天前, by 小张</td>
+              <td class="flex items-center gap-1">
+                <div class="dropdown dropdown-end">
+                    <button tabindex="0" role="button" class="btn btn-sm btn-ghost btn-circle"><i data-lucide="settings" class="w-4 h-4"></i></button>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a class="whitespace-nowrap" onclick="triggerFileUpload('update', 'doc_001')">更新文档</a></li>
+                        <li><a class="whitespace-nowrap" onclick="renameDocument('doc_001')">重命名</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-sm btn-ghost btn-circle text-error" onclick="confirmDeleteDocument('doc_001', '安装指南.md')"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </td>
+            </tr>
+            <!-- 示例行 2: 已启用 -->
+            <tr data-doc-id="doc_002" data-status="enabled">
+              <td><label><input type="checkbox" class="checkbox document-checkbox" data-doc-id="doc_002" onchange="handleDocumentSelection()" /></label></td>
+              <td><a href="./P_022_knowledge_item_list.html" class="link link-hover font-medium flex items-center gap-2">➡️ 功能列表.txt</a></td>
+              <td><div class="badge badge-success badge-outline gap-1">已启用</div></td>
+              <td class="text-center"><input type="checkbox" class="toggle toggle-success" checked onchange="toggleDocumentStatus('doc_002', this)" /></td>
+              <td class="text-center">88</td>
+              <td>1天前</td>
+              <td>5小时前, by 王...</td>
+              <td class="flex items-center gap-1">
+                <div class="dropdown dropdown-end">
+                    <button tabindex="0" role="button" class="btn btn-sm btn-ghost btn-circle"><i data-lucide="settings" class="w-4 h-4"></i></button>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a class="whitespace-nowrap" onclick="triggerFileUpload('update', 'doc_002')">更新文档</a></li>
+                        <li><a class="whitespace-nowrap" onclick="renameDocument('doc_002')">重命名</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-sm btn-ghost btn-circle text-error" onclick="confirmDeleteDocument('doc_002', '功能列表.txt')"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </td>
+            </tr>
+            <!-- 示例行 3: 已禁用 -->
+            <tr data-doc-id="doc_003" data-status="disabled">
+              <td><label><input type="checkbox" class="checkbox document-checkbox" data-doc-id="doc_003" onchange="handleDocumentSelection()" /></label></td>
+              <td><a href="./P_022_knowledge_item_list.html" class="link link-hover font-medium flex items-center gap-2">➡️ API参考.md</a></td>
+              <td><div class="badge badge-outline gap-1">已禁用</div></td>
+              <td class="text-center"><input type="checkbox" class="toggle toggle-success" onchange="toggleDocumentStatus('doc_003', this)" /></td>
+              <td class="text-center">230</td>
+              <td>2周前</td>
+              <td>1周前, by 李工</td>
+              <td class="flex items-center gap-1">
+                 <div class="dropdown dropdown-end">
+                    <button tabindex="0" role="button" class="btn btn-sm btn-ghost btn-circle"><i data-lucide="settings" class="w-4 h-4"></i></button>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a class="whitespace-nowrap" onclick="triggerFileUpload('update', 'doc_003')">更新文档</a></li>
+                        <li><a class="whitespace-nowrap" onclick="renameDocument('doc_003')">重命名</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-sm btn-ghost btn-circle text-error" onclick="confirmDeleteDocument('doc_003', 'API参考.md')"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </td>
+            </tr>
+            <!-- 示例行 5: 解析失败 (UXD新增状态) -->
+            <tr data-doc-id="doc_005" data-status="failed">
+              <td><label><input type="checkbox" class="checkbox document-checkbox" data-doc-id="doc_005" onchange="handleDocumentSelection()" /></label></td>
+              <td><a class="font-medium flex items-center gap-2 text-error">➡️ 历史活动说明.txt</a></td>
+              <td><div class="badge badge-error badge-outline gap-1">解析失败</div></td>
+              <td class="text-center"><input type="checkbox" class="toggle toggle-success" disabled /></td>
+              <td class="text-center">0</td>
+              <td>1分钟前</td>
+              <td>-</td>
+              <td class="flex items-center gap-1">
+                 <div class="dropdown dropdown-end">
+                    <button tabindex="0" role="button" class="btn btn-sm btn-ghost btn-circle"><i data-lucide="settings" class="w-4 h-4"></i></button>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a class="whitespace-nowrap" onclick="retryParseDocument('doc_005')">重试解析</a></li>
+                        <li><a class="whitespace-nowrap" onclick="viewParseLog('doc_005')">查看日志</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-sm btn-ghost btn-circle text-error" onclick="confirmDeleteDocument('doc_005', '历史活动说明.txt')"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 底部分页 -->
+      <div class="flex justify-center items-center gap-4 mt-6">
+        <div class="join">
+          <button class="join-item btn btn-sm" onclick="goToPage('prev')">«</button>
+          <button class="join-item btn btn-sm btn-active">1</button>
+          <button class="join-item btn btn-sm" onclick="goToPage(2)">2</button>
+          <button class="join-item btn btn-sm" onclick="goToPage(3)">3</button>
+          <button class="join-item btn btn-sm" onclick="goToPage('next')">»</button>
+        </div>
+        <span class="text-sm text-base-content/70">共 15 个文档</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 文档上传器 (P_012) -->
+  <dialog id="uploader_modal" class="modal">
+    <div class="modal-box">
+      <h3 id="uploader_modal_title" class="font-bold text-lg flex items-center gap-2"></h3>
+      <div id="uploader_modal_content" class="py-4">
+        <!-- JS will populate this -->
+      </div>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn">取消</button>
+          <button id="uploader_modal_confirm_btn" class="btn btn-neutral">确认</button>
+        </form>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <!-- Modal: 确认删除 (P_013) -->
+  <dialog id="confirm_delete_modal" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="alert-triangle" class="text-error"></i>确认删除</h3>
+      <p class="py-4">您确定要删除文档 '安装指南.md' 吗？此操作不可逆，相关的知识条目也将被一并删除。</p>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn">取消</button>
+          <button class="btn btn-error">确认删除</button>
+        </form>
+      </div>
+    </div>
+     <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+  
+  <!-- Modal: 开发者注释 (Developer Note) -->
+  <dialog id="developer_note_modal" class="modal modal-bottom sm:modal-middle">
+      <div class="modal-box prose">
+          <h3 id="developer_note_title" class="font-bold text-lg"></h3>
+          <div id="developer_note_content" class="py-4"></div>
+          <div class="modal-action">
+              <form method="dialog">
+                  <button class="btn">关闭</button>
+              </form>
+          </div>
+      </div
+      <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <!-- 隐藏的开发者注释内容 -->
+  <div id="note_upload_process" style="display:none;">
+    <p>点击"上传文档"按钮将触发 <code>P_012</code> (文档上传器) 模态框。</p>
+    <p>后端需处理文件上传、格式与大小校验，并**调用第三方API**进行文档的异步解析和切块。操作成功后，建议通过WebSocket或定时轮询的方式刷新此列表，并向用户明确回显成功状态。</p>
+    <div class="alert alert-warning">
+        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+        <span>请重点关注与第三方API交互的**完整日志、重试及告警机制** (见PRD <code>KB-MAN-004</code> & <code>3.1.4 异常处理</code>)。这是系统的关键可靠性保障点。</span>
+    </div>
+  </div>
+
+  <div id="note_batch_operations" style="display:none;">
+      <p>批量操作（如批量禁用/删除）是高级功能，必须实现高健壮性。</p>
+      <p>一个关键的异常场景是**部分失败**。例如，批量禁用3个文档，其中2个成功，1个因网络或权限问题失败。</p>
+      <div class="alert alert-info">
+        <i data-lucide="info" class="w-4 h-4"></i>
+        <span>后端接口应能返回每个操作的独立状态。前端收到响应后，需清晰地通知用户哪些成功、哪些失败（例如，通过一个持久化的Alert Banner），并高亮显示失败的条目以供用户跟进 (见UXD <code>P_021</code> 核心用户操作流2及错误处理部分)。</span>
+      </div>
+  </div>
+
+  <script>
+    // Lucide Icons 初始化
+    lucide.createIcons();
+
+    // 全局状态管理
+    let selectedDocuments = new Set();
+    let sortColumn = null;
+    let sortDirection = 'asc';
+
+    // 开发者注释功能
+    function showDeveloperNote(noteContentId, noteTitle) {
+        const titleEl = document.getElementById('developer_note_title');
+        const contentEl = document.getElementById('developer_note_content');
+        const noteSourceEl = document.getElementById(noteContentId);
+        const modal = document.getElementById('developer_note_modal');
+
+        if (titleEl && contentEl && noteSourceEl && modal) {
+            titleEl.textContent = noteTitle;
+            contentEl.innerHTML = noteSourceEl.innerHTML;
+            // 重新渲染新内容中的 lucide-icons
+            lucide.createIcons({
+                context: contentEl
+            });
+            modal.showModal();
+        }
+    }
+
+    // Toast 通知系统
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} shadow-lg mb-2 animate-bounce`;
+        toast.innerHTML = `
+            <div class="flex items-center gap-2">
+                <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}" class="w-4 h-4"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        lucide.createIcons({ context: toast });
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'fixed top-4 right-4 z-50 w-80';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // 文档选择处理
+    function handleDocumentSelection() {
+        const checkboxes = document.querySelectorAll('.document-checkbox');
+        selectedDocuments.clear();
+        
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedDocuments.add(checkbox.dataset.docId);
+            }
+        });
+        
+        updateBatchActionBar();
+        updateSelectAllCheckbox();
+    }
+
+    // 全选/取消全选
+    function toggleSelectAll() {
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const documentCheckboxes = document.querySelectorAll('.document-checkbox');
+        
+        documentCheckboxes.forEach(checkbox => {
+            if (!checkbox.disabled) {
+                checkbox.checked = selectAllCheckbox.checked;
+            }
+        });
+        
+        handleDocumentSelection();
+    }
+
+    // 更新批量操作栏
+    function updateBatchActionBar() {
+        const batchActionBar = document.getElementById('batchActionBar');
+        const selectedCount = document.getElementById('selectedCount');
+        const count = selectedDocuments.size;
+        
+        selectedCount.textContent = count;
+        if (count > 0) {
+            batchActionBar.classList.remove('hidden');
+            setTimeout(() => batchActionBar.classList.remove('scale-95', 'opacity-0', '-translate-y-2'), 10);
+        } else {
+            batchActionBar.classList.add('scale-95', 'opacity-0', '-translate-y-2');
+            setTimeout(() => batchActionBar.classList.add('hidden'), 300);
+        }
+    }
+
+    // 更新全选复选框状态
+    function updateSelectAllCheckbox() {
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const documentCheckboxes = document.querySelectorAll('.document-checkbox:not([disabled])');
+        const checkedCount = document.querySelectorAll('.document-checkbox:not([disabled]):checked').length;
+        
+        if (checkedCount === 0) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        } else if (checkedCount === documentCheckboxes.length) {
+            selectAllCheckbox.checked = true;
+            selectAllCheckbox.indeterminate = false;
+        } else {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = true;
+        }
+    }
+
+    // 清除选择
+    function clearSelection() {
+        const checkboxes = document.querySelectorAll('.document-checkbox');
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+        selectedDocuments.clear();
+        updateBatchActionBar();
+        updateSelectAllCheckbox();
+    }
+
+    // 快速启用/禁用单个文档
+    function toggleDocumentStatus(docId, toggleElement) {
+        const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+        const statusBadge = row.querySelector('.badge');
+        const isEnabled = toggleElement.checked;
+        
+        // 模拟API调用延迟
+        setTimeout(() => {
+            if (isEnabled) {
+                statusBadge.className = 'badge badge-success badge-outline gap-1';
+                statusBadge.textContent = '已启用';
+                row.dataset.status = 'enabled';
+                showToast(`文档已启用`);
+            } else {
+                statusBadge.className = 'badge badge-outline gap-1';
+                statusBadge.textContent = '已禁用';
+                row.dataset.status = 'disabled';
+                showToast(`文档已禁用`, 'info');
+            }
+        }, 300);
+    }
+
+    // 批量启用文档
+    function batchEnableDocuments() {
+        if (selectedDocuments.size === 0) return;
+        
+        const confirmMsg = `您确定要启用选中的 ${selectedDocuments.size} 个文档吗？`;
+        if (!confirm(confirmMsg)) return;
+
+        let successCount = 0;
+        selectedDocuments.forEach(docId => {
+            const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+            const statusBadge = row.querySelector('.badge');
+            const toggle = row.querySelector('.toggle');
+            
+            statusBadge.className = 'badge badge-success badge-outline gap-1';
+            statusBadge.textContent = '已启用';
+            toggle.checked = true;
+            row.dataset.status = 'enabled';
+            successCount++;
+        });
+
+        clearSelection();
+        showToast(`成功启用 ${successCount} 个文档`);
+    }
+
+    // 批量禁用文档
+    function batchDisableDocuments() {
+        if (selectedDocuments.size === 0) return;
+        
+        const confirmMsg = `您确定要禁用选中的 ${selectedDocuments.size} 个文档吗？禁用后，相关的知识条目将无法被AI应用检索。`;
+        if (!confirm(confirmMsg)) return;
+
+        let successCount = 0;
+        selectedDocuments.forEach(docId => {
+            const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+            const statusBadge = row.querySelector('.badge');
+            const toggle = row.querySelector('.toggle');
+            
+            statusBadge.className = 'badge badge-outline gap-1';
+            statusBadge.textContent = '已禁用';
+            toggle.checked = false;
+            row.dataset.status = 'disabled';
+            successCount++;
+        });
+
+        clearSelection();
+        showToast(`成功禁用 ${successCount} 个文档`, 'warning');
+    }
+
+    // 批量删除文档
+    function batchDeleteDocuments() {
+        if (selectedDocuments.size === 0) return;
+        
+        const confirmMsg = `⚠️ 危险操作：您确定要永久删除选中的 ${selectedDocuments.size} 个文档吗？此操作不可恢复！`;
+        if (!confirm(confirmMsg)) return;
+
+        const deletedCount = selectedDocuments.size;
+        selectedDocuments.forEach(docId => {
+            const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+            row.remove();
+        });
+
+        clearSelection();
+        showToast(`成功删除 ${deletedCount} 个文档`, 'error');
+    }
+
+    // 确认删除单个文档
+    function confirmDeleteDocument(docId, docName) {
+        const modal = document.getElementById('confirm_delete_modal');
+        const modalText = modal.querySelector('p');
+        modalText.textContent = `您确定要删除文档 '${docName}' 吗？此操作不可逆，相关的知识条目也将被一并删除。`;
+        
+        // 保存当前删除的文档信息
+        window.pendingDeleteDoc = { docId, docName };
+        modal.showModal();
+    }
+
+    // 执行删除操作
+    function executeDelete() {
+        if (window.pendingDeleteDoc) {
+            const { docId, docName } = window.pendingDeleteDoc;
+            const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+            row.remove();
+            showToast(`文档 '${docName}' 已删除`, 'error');
+            delete window.pendingDeleteDoc;
+        }
+    }
+
+    // --- UPLOAD/UPDATE LOGIC ---
+
+    // This will store the file and context for the modal confirmation
+    let uploadContext = {};
+
+    // Main function to trigger the file selection
+    function triggerFileUpload(mode = 'new', docId = null) {
+        // Create a file input element dynamically
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.txt,.md,.pdf';
+        fileInput.style.display = 'none';
+        
+        fileInput.onchange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                prepareUploadModal(file, docId);
+            }
+        };
+        
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        document.body.removeChild(fileInput);
+    }
+
+    // Prepares and shows the upload modal after a file is selected
+    function prepareUploadModal(file, docIdForUpdate) {
+        const existingDocRow = Array.from(document.querySelectorAll('tbody tr td:nth-child(2) a'))
+                                    .find(a => a.textContent.trim().substring(2) === file.name);
+        const fileExists = !!existingDocRow;
+
+        const modal = document.getElementById('uploader_modal');
+        const titleEl = document.getElementById('uploader_modal_title');
+        const contentEl = document.getElementById('uploader_modal_content');
+        const confirmBtn = document.getElementById('uploader_modal_confirm_btn');
+
+        uploadContext = { file }; // Store context
+
+        if (fileExists) {
+            // This is an UPDATE scenario
+            uploadContext.mode = 'update';
+            uploadContext.docId = existingDocRow.closest('tr').dataset.docId;
+
+            titleEl.innerHTML = `<i data-lucide="refresh-cw"></i> 更新现有文档`;
+            contentEl.innerHTML = `
+                <div class="alert alert-warning">
+                    <i data-lucide="alert-triangle"></i>
+                    <span>文件 <strong>${file.name}</strong> 已存在。继续上传将覆盖现有内容。</span>
+                </div>
+                <p class="mt-4">您确定要继续吗？</p>
+            `;
+            confirmBtn.textContent = '确认更新';
+            confirmBtn.className = 'btn btn-warning';
+        } else {
+            // This is a NEW upload scenario
+            uploadContext.mode = 'new';
+
+            titleEl.innerHTML = `<i data-lucide="upload-cloud"></i> 上传新文档`;
+            contentEl.innerHTML = `
+                <p>您即将上传新文档:</p>
+                <div class="font-bold my-2 p-2 bg-base-200 rounded">${file.name}</div>
+                <p class="text-xs text-base-content/70">支持 .txt, .md, .pdf 格式，最大 10MB。</p>
+            `;
+            confirmBtn.textContent = '确认上传';
+            confirmBtn.className = 'btn btn-neutral';
+        }
+        
+        lucide.createIcons({ context: modal });
+        modal.showModal();
+    }
+
+    // This function is called when the modal's confirm button is clicked
+    function executeUpload() {
+        const { file, mode, docId } = uploadContext;
+        
+        if (mode === 'new') {
+            // Simulate adding a new row
+            const tbody = document.querySelector('tbody');
+            const newRow = document.createElement('tr');
+            const newDocId = 'doc_new_' + Date.now();
+            newRow.dataset.docId = newDocId;
+            newRow.dataset.status = 'enabled';
+            newRow.innerHTML = `
+                <td><label><input type="checkbox" class="checkbox document-checkbox" data-doc-id="${newDocId}" onchange="handleDocumentSelection()" /></label></td>
+                <td><a href="./P_022_knowledge_item_list.html" class="link link-hover font-medium flex items-center gap-2">➡️ ${file.name}</a></td>
+                <td><div class="badge badge-success badge-outline gap-1">已启用</div></td>
+                <td class="text-center"><input type="checkbox" class="toggle toggle-success" checked onchange="toggleDocumentStatus('${newDocId}', this)" /></td>
+                <td class="text-center">${Math.floor(Math.random() * 100)}</td>
+                <td>刚刚</td>
+                <td>刚刚, by 您</td>
+                <td class="flex items-center gap-1">
+                    <div class="dropdown dropdown-end">
+                        <button tabindex="0" role="button" class="btn btn-sm btn-ghost btn-circle"><i data-lucide="settings" class="w-4 h-4"></i></button>
+                        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                            <li><a class="whitespace-nowrap" onclick="triggerFileUpload('update', '${newDocId}')">更新文档</a></li>
+                            <li><a class="whitespace-nowrap" onclick="renameDocument('${newDocId}')">重命名</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-sm btn-ghost btn-circle text-error" onclick="confirmDeleteDocument('${newDocId}', '${file.name}')"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </td>
+            `;
+            tbody.insertBefore(newRow, tbody.firstChild);
+            lucide.createIcons({ context: newRow });
+            showToast(`文档 '${file.name}' 已成功上传。`);
+
+        } else if (mode === 'update') {
+            // Simulate updating an existing row
+            const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+            if (row) {
+                const updateCell = row.querySelector('td:nth-child(7)');
+                updateCell.textContent = '刚刚, by 您';
+                
+                // Animate the row to show it was updated
+                row.classList.add('bg-info', 'transition-all', 'duration-1000');
+                setTimeout(() => {
+                    row.classList.remove('bg-info');
+                }, 1500);
+
+                showToast(`文档 '${file.name}' 已成功更新。`);
+            }
+        }
+        
+        // Clear context after use
+        uploadContext = {};
+    }
+
+    // 表格排序
+    function sortTable(column) {
+        const tbody = document.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        // 更新排序方向
+        if (sortColumn === column) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortColumn = column;
+            sortDirection = 'asc';
+        }
+        
+        // 排序逻辑
+        rows.sort((a, b) => {
+            let aValue, bValue;
+            
+            switch (column) {
+                case 'name':
+                    aValue = a.querySelector('td:nth-child(2) a').textContent.trim();
+                    bValue = b.querySelector('td:nth-child(2) a').textContent.trim();
+                    break;
+                case 'status':
+                    aValue = a.dataset.status || 'unknown';
+                    bValue = b.dataset.status || 'unknown';
+                    break;
+                case 'items':
+                    aValue = parseInt(a.querySelector('td:nth-child(5)').textContent) || 0;
+                    bValue = parseInt(b.querySelector('td:nth-child(5)').textContent) || 0;
+                    break;
+                case 'upload':
+                case 'update':
+                    // 简化的时间排序，实际应该解析具体时间
+                    aValue = a.querySelector(`td:nth-child(${column === 'upload' ? 6 : 7})`).textContent.trim();
+                    bValue = b.querySelector(`td:nth-child(${column === 'upload' ? 6 : 7})`).textContent.trim();
+                    break;
+            }
+            
+            if (typeof aValue === 'string') {
+                return sortDirection === 'asc'
+                    ? aValue.localeCompare(bValue)
+                    : bValue.localeCompare(aValue);
+            } else {
+                return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+            }
+        });
+        
+        // 重新插入排序后的行
+        rows.forEach(row => tbody.appendChild(row));
+        
+        // 更新排序图标
+        updateSortIcons(column);
+    }
+
+    // 更新排序图标
+    function updateSortIcons(activeColumn) {
+        const columns = ['name', 'status', 'items', 'upload', 'update'];
+        columns.forEach(col => {
+            const icon = document.getElementById(`sort-${col}`);
+            if (icon) {
+                if (col === activeColumn) {
+                    icon.setAttribute('data-lucide', sortDirection === 'asc' ? 'chevron-up' : 'chevron-down');
+                    icon.className = 'w-4 h-4 inline ml-1 opacity-100';
+                } else {
+                    icon.setAttribute('data-lucide', 'chevron-down');
+                    icon.className = 'w-4 h-4 inline ml-1 opacity-50';
+                }
+            }
+        });
+        lucide.createIcons();
+    }
+
+    // 搜索功能
+    function searchDocuments() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const docName = row.querySelector('td:nth-child(2) a').textContent.toLowerCase();
+            if (docName.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // 分页功能
+    function goToPage(page) {
+        // 模拟分页跳转
+        console.log('跳转到页面:', page);
+        showToast(`已跳转到第 ${page} 页`, 'info');
+    }
+
+    // 文档操作函数
+    function renameDocument(docId) {
+        const newName = prompt('请输入新的文档名称:');
+        if (newName && newName.trim()) {
+            const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+            const link = row.querySelector('td:nth-child(2) a');
+            const deleteBtn = row.querySelector('button.text-error');
+            link.textContent = `➡️ ${newName.trim()}`;
+            if(deleteBtn) {
+                deleteBtn.setAttribute('onclick', `confirmDeleteDocument('${docId}', '${newName.trim().replace(/'/g, "\\'")}')`);
+            }
+            showToast(`文档已重命名为 "${newName.trim()}"`);
+        }
+    }
+
+    function retryParseDocument(docId) {
+        const row = document.querySelector(`tr[data-doc-id="${docId}"]`);
+        const statusBadge = row.querySelector('.badge');
+        
+        // 设置为重新解析中状态
+        row.className = 'opacity-70';
+        row.dataset.status = 'updating';
+        statusBadge.className = 'badge badge-warning badge-outline gap-1';
+        statusBadge.textContent = '重新解析中...';
+        
+        showToast('开始重新解析文档', 'info');
+        
+        // 模拟重新解析
+        setTimeout(() => {
+            const success = Math.random() > 0.3; // 70% 成功率
+            
+            if (success) {
+                row.className = '';
+                row.dataset.status = 'enabled';
+                statusBadge.className = 'badge badge-success badge-outline gap-1';
+                statusBadge.textContent = '已启用';
+                
+                const itemsCell = row.querySelector('td:nth-child(5)');
+                itemsCell.textContent = '45';
+                
+                const toggle = row.querySelector('.toggle');
+                toggle.disabled = false;
+                toggle.checked = true;
+                
+                showToast('文档解析成功');
+            } else {
+                row.className = '';
+                row.dataset.status = 'failed';
+                statusBadge.className = 'badge badge-error badge-outline gap-1';
+                statusBadge.textContent = '解析失败';
+                showToast('文档解析失败，请检查文档格式', 'error');
+            }
+        }, 2000);
+    }
+
+    function viewParseLog(docId) {
+        alert('解析日志:\n\n错误: 文档格式不支持\n时间: 2024-01-15 10:30:25\n建议: 请确保文档为 .txt, .md, .pdf 格式');
+    }
+
+    // 页面加载完成后的初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // 绑定确认删除按钮事件
+        const confirmDeleteBtn = document.querySelector('#confirm_delete_modal .btn-error');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.onclick = executeDelete;
+        }
+        
+        // 绑定上传确认按钮事件
+        const confirmUploadBtn = document.getElementById('uploader_modal_confirm_btn');
+        if (confirmUploadBtn) {
+            confirmUploadBtn.onclick = executeUpload;
+        }
+    });
+  </script>
+
+</body>
+</html>
+<!-- END: P_021_document_list.html --> 

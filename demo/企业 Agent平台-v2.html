@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业级智能助手平台战略规划方案</title>
+    
+    <!-- TailwindCSS & Preline UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.1.0/dist/preline.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style type="text/tailwindcss">
+        @layer base {
+            html {
+                font-family: 'Noto Sans SC', sans-serif;
+            }
+            body {
+                @apply bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-200 transition-colors duration-300;
+            }
+            .fade-in-section {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            }
+            .fade-in-section.is-visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @layer components {
+            .card {
+                @apply bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            }
+            .card-title {
+                @apply text-lg font-semibold text-gray-800 dark:text-white;
+            }
+            .card-content {
+                @apply mt-2 text-gray-600 dark:text-gray-400;
+            }
+            .section-title {
+                @apply text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl;
+            }
+            .section-subtitle {
+                @apply mt-2 text-lg leading-8 text-gray-600 dark:text-gray-400;
+            }
+            .keyword {
+                @apply text-emerald-600 dark:text-emerald-400 font-semibold px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-md;
+            }
+        }
+    </style>
+    
+    <!-- 模拟 tailwind.config.js 自定义配置 (已更新为 emerald) -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'emerald': {
+                            '50': '#ecfdf5', '100': '#d1fae5', '200': '#a7f3d0', '300': '#6ee7b7', 
+                            '400': '#34d399', '500': '#10b981', '600': '#059669', '700': '#047857', 
+                            '800': '#065f46', '900': '#064e3b', '950': '#022c22'
+                        },
+                        gray: {
+                           950: '#0c0c10'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full backdrop-blur flex-none transition-colors duration-500 lg:border-b lg:border-gray-900/10 dark:border-gray-50/[0.06] bg-white/70 dark:bg-gray-950/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-robot text-emerald-600 text-2xl mr-3"></i>
+                    <span class="font-bold text-xl text-gray-900 dark:text-white">企业级智能助手平台</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <nav class="hidden md:flex space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300">
+                        <a href="#summary" class="hover:text-emerald-600 transition-colors">简述</a>
+                        <a href="#challenges" class="hover:text-emerald-600 transition-colors">挑战</a>
+                        <a href="#architecture" class="hover:text-emerald-600 transition-colors">核心架构</a>
+                        <a href="#roadmap" class="hover:text-emerald-600 transition-colors">实施路线图</a>
+                        <a href="#mvp" class="hover:text-emerald-600 transition-colors">MVP计划</a>
+                    </nav>
+                    <button id="theme-toggle" type="button" class="hs-dark-mode-active:hidden block hs-dark-mode group flex items-center justify-center h-9 w-9 rounded-full bg-white/50 hover:bg-gray-200 dark:bg-gray-800/50 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fa-solid fa-moon text-gray-600"></i>
+                    </button>
+                    <button id="theme-toggle-dark" type="button" class="hs-dark-mode-active:block hidden hs-dark-mode group flex items-center justify-center h-9 w-9 rounded-full bg-white/50 hover:bg-gray-200 dark:bg-gray-800/50 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fa-solid fa-sun text-yellow-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+
+        <!-- 1. Hero Section / 简述 -->
+        <section id="summary" class="text-center mb-24 fade-in-section">
+            <div class="inline-block bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-sm font-medium px-3 py-1 rounded-full mb-4">
+                战略规划方案
+            </div>
+            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
+                企业级智能助手平台
+            </h1>
+            <p class="mt-6 max-w-3xl mx-auto text-xl text-gray-600 dark:text-gray-400">
+                构建<code class="keyword">“智能化赋能中台”</code>，解决企业内重复投入、数据孤岛等痛点，通过<code class="keyword">低代码/无代码</code>方式，赋能业务部门快速构建、部署和管理面向各类场景的智能Agent。
+            </p>
+            <div class="mt-10 flex items-center justify-center gap-x-6">
+                <a href="#roadmap" class="rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-transform hover:scale-105">查看路线图</a>
+                <a href="#architecture" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">核心架构 <span aria-hidden="true">→</span></a>
+            </div>
+        </section>
+
+        <!-- NEW: Challenges Section -->
+        <section id="challenges" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">当前挑战与机遇</h2>
+                <p class="section-subtitle">企业在智能化转型中普遍面临的“成长的烦恼”。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Challenge 1 -->
+                <div class="card p-8 bg-gray-100 dark:bg-gray-900">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center justify-center w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900/30">
+                            <i class="fa-solid fa-triangle-exclamation text-xl text-red-500"></i>
+                        </span>
+                        <h3 class="text-xl font-bold">重复投入，分散经验</h3>
+                    </div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">各部门各自为战，重复造轮子，投入高昂，且成功经验无法跨部门借鉴，导致整体效率低下。</p>
+                    <div class="mt-6 text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>机遇：统一平台解决</span>
+                    </div>
+                </div>
+                <!-- Challenge 2 -->
+                <div class="card p-8 bg-gray-100 dark:bg-gray-900">
+                    <div class="flex items-center gap-4">
+                         <span class="flex items-center justify-center w-12 h-12 rounded-lg bg-sky-100 dark:bg-sky-900/30">
+                            <i class="fa-solid fa-users-gear text-xl text-sky-500"></i>
+                        </span>
+                        <h3 class="text-xl font-bold">高昂人力成本</h3>
+                    </div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">大量人员被海量的、重复的问询所淹没，无法专注于更高价值的创新性工作，限制了服务效率上限。</p>
+                     <div class="mt-6 text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>机遇：80%常规问题自动化</span>
+                    </div>
+                </div>
+                <!-- Challenge 3 -->
+                <div class="card p-8 bg-gray-100 dark:bg-gray-900">
+                     <div class="flex items-center gap-4">
+                         <span class="flex items-center justify-center w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                            <i class="fa-solid fa-database-slash text-xl text-purple-500"></i>
+                        </span>
+                        <h3 class="text-xl font-bold">流失的知识，割裂的数据</h3>
+                    </div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">宝贵知识随人员流动而流失，跨系统的数据孤岛导致无法形成对客户或员工的完整认知。</p>
+                    <div class="mt-6 text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>机遇：构建企业知识中枢</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Diagram Placeholder -->
+        <section id="architecture-diagram" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">企业级智能助手平台架构图</h2>
+            </div>
+            <div class="mt-8 bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-2 sm:p-2 flex flex-col items-center justify-center text-center">
+                <img src="./企业级智能助手平台架构-v2.png" alt="企业级智能助手平台架构图" class="w-full h-full object-contain rounded-lg">
+            </div>
+        </section>
+
+        <!-- REWORKED: Architecture Pillars -->
+        <section id="architecture" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">平台核心架构三大支柱</h2>
+                <p class="section-subtitle">我们的平台构建在三大核心支柱之上，共同支撑起企业智能化的未来。</p>
+            </div>
+            <div class="mt-12 space-y-12">
+                <!-- Pillar 1 -->
+                <div class="card p-6 md:p-8">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-brain text-3xl text-emerald-500 flex-shrink-0"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">智能认知与决策引擎</h3>
+                    </div>
+                    <p class="mt-3 text-gray-600 dark:text-gray-400">作为平台的“大脑”，负责深度理解信息、管理知识、进行推理决策，是所有智能体实现高级智能的基石。</p>
+                    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">自然语言理解</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">使智能体能准确捕捉用户通过自然语言传递的<code class="keyword"></code>显性需求</code>与<code class="keyword">隐性情感</code>，理解复杂、口语化的表述。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">动态对话管理 (DM)</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">实现流畅、自然、多轮次的连贯对话，确保交互的逻辑性和用户体验的顺滑性。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">LLM集成与赋能中心</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">充分、安全、高效地利用LLM的泛化能力，并通过<code class="keyword">Prompt工程</code>和<code class="keyword">RAG</code>框架将其融入特定业务场景。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">企业知识中枢 (KMS)</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">构建和维护一个动态更新、可信赖的企业级“知识大脑”，为AI提供精准、高质量的上下文信息。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 col-span-1 md:col-span-2">
+                             <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">深度用户理解与个性化引擎</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">驱动智能体提供真正千人千面、精准触达、甚至超越用户预期的个性化服务与内容推荐。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Pillar 2 -->
+                <div class="card p-6 md:p-8">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-cubes-stacked text-3xl text-emerald-500 flex-shrink-0"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">智能体构建与流程编排中心</h3>
+                    </div>
+                    <p class="mt-3 text-gray-600 dark:text-gray-400">作为智能体的“设计工坊”，赋能业务人员通过低代码/无代码方式，直观地设计Agent行为逻辑、编排复杂业务流程。</p>
+                    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">低代码/无代码构建工作台</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">大幅降低智能体应用的构建门槛和周期，提供模板市场、多渠道部署和灰度发布能力，使业务创新能够快速落地验证。</p>
+                            </div>
+                        </div>
+                         <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">智能流程自动化引擎</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">将重复性业务流程及多系统协作任务，通过可视化编排和事件驱动实现高效自动化，并支持新流程的优化与验证。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pillar 3 -->
+                <div class="card p-6 md:p-8">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-shield-halved text-3xl text-emerald-500 flex-shrink-0"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">开放生态与运营管理平台</h3>
+                    </div>
+                    <p class="mt-3 text-gray-600 dark:text-gray-400">作为平台的“指挥塔”，负责为智能体提供运行所需的一切外部能力和保障，并对其全生命周期进行精细化监控与管理。</p>
+                     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">统一能力接入与适配网关</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">实现对企业内外部各类原子能力的“即插即用”、灵活替换和统一治理，为Agent构建一个开放、可扩展的能力生态。</p>
+                            </div>
+                        </div>
+                         <div class="flex items-start gap-3">
+                            <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">一体化智能运营与分析平台</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">实现对智能体全生命周期的精细化管理、数据驱动的持续优化和人机协同的服务闭环。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 col-span-1 md:col-span-2">
+                             <i class="fa-regular fa-circle-check mt-1 text-emerald-500"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">平台基础与安全保障</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">提供坚实、安全、可靠的运行环境和集成基础，建立统一认证授权与安全凭证管理，保障数据安全交换。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Value Proposition -->
+        <section id="value-prop" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">核心解决方案与价值</h2>
+                <p class="section-subtitle">我们提供一个通用、开放、可扩展的环境，让创新触手可及。</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mt-12">
+                <div class="mt-8 space-y-6">
+                    <div class="flex">
+                        <i class="fa-solid fa-users text-2xl text-emerald-500 mt-1 mr-4 flex-shrink-0"></i>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">对业务部门</h3>
+                            <p class="text-gray-600 dark:text-gray-400">敏捷响应业务需求，快速验证创新想法，让团队更专注于核心业务价值的创造。</p>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <i class="fa-solid fa-building-shield text-2xl text-emerald-500 mt-1 mr-4 flex-shrink-0"></i>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">对企业整体</h3>
+                            <p class="text-gray-600 dark:text-gray-400">沉淀并共享AI能力与数据资产，加速数字化转型，构筑难以复制的核心竞争优势。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center">
+                    <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+                        <div class="card p-6 text-center">
+                            <i class="fa-solid fa-bolt text-4xl text-emerald-500 mb-2"></i>
+                            <h3 class="font-bold">效率提升</h3>
+                        </div>
+                         <div class="card p-6 text-center">
+                            <i class="fa-solid fa-lightbulb text-4xl text-emerald-500 mb-2"></i>
+                            <h3 class="font-bold">加速创新</h3>
+                        </div>
+                         <div class="card p-6 text-center">
+                            <i class="fa-solid fa-hand-holding-heart text-4xl text-emerald-500 mb-2"></i>
+                            <h3 class="font-bold">体验优化</h3>
+                        </div>
+                         <div class="card p-6 text-center">
+                            <i class="fa-solid fa-database text-4xl text-emerald-500 mb-2"></i>
+                            <h3 class="font-bold">资产沉淀</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW: Key Goals & Quantifiable Results -->
+        <section id="key-goals" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">关键目标与量化预期成果</h2>
+                <p class="section-subtitle">以终为始，我们用明确的数据指标来衡量成功。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-robot text-4xl text-emerald-500 mb-3"></i>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">&gt; N 个</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">成功创建智能助手</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-building text-4xl text-emerald-500 mb-3"></i>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">&gt; 60%</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">业务部门覆盖率</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-gears text-4xl text-emerald-500 mb-3"></i>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">&gt; 70%</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">AI能力复用率</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-hand-holding-dollar text-4xl text-emerald-500 mb-3"></i>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">&gt; 40%</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">项目平均成本降低</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Roadmap -->
+        <!-- NEW: Four Dimensions Section -->
+        <section id="capability-dimensions" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">平台能力演进四维框架</h2>
+                <p class="section-subtitle">完整映射平台架构三大支柱，清晰指引平台演进路径。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Dimension 1: Autonomy -->
+                <div class="card p-6">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-rocket text-2xl text-emerald-500"></i>
+                        <h3 class="card-title">自主性 - <span class="text-base font-normal text-gray-500 dark:text-gray-400">能做什么</span></h3>
+                    </div>
+                    <ul class="mt-4 space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+                        <li><strong>L1 - 流程化响应:</strong> 能引导用户完成预定义的、结构化的流程。</li>
+                        <li><strong>L2 - 主动式互动:</strong> 能基于事件或规则，主动发起交互、提供建议。</li>
+                        <li><strong>L3 - 协作式服务:</strong> 能自主规划、调用多工具、跨系统执行复杂任务，并与其他Agent协作。</li>
+                    </ul>
+                </div>
+                <!-- Dimension 2: Intelligence -->
+                <div class="card p-6">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-lightbulb text-2xl text-emerald-500"></i>
+                        <h3 class="card-title">智能决策 - <span class="text-base font-normal text-gray-500 dark:text-gray-400">有多聪明</span></h3>
+                    </div>
+                    <ul class="mt-4 space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+                        <li><strong>L1 - 逻辑推理:</strong> 理解上下文、进行简单的因果和逻辑判断，支持流程化对话。</li>
+                        <li><strong>L2 - 策略推荐:</strong> 结合业务策略模型和基础用户画像，提供个性化的、有策略依据的建议。</li>
+                        <li><strong>L3 - 目标驱动规划:</strong> 能基于模糊目标，自主规划并分解任务，动态调整执行路径。</li>
+                    </ul>
+                </div>
+                <!-- Dimension 3: Cost of Use -->
+                <div class="card p-6">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-users-gear text-2xl text-emerald-500"></i>
+                        <h3 class="card-title">使用成本 - <span class="text-base font-normal text-gray-500 dark:text-gray-400">多好用</span></h3>
+                    </div>
+                     <ul class="mt-4 space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+                        <li><strong>L1 - 模板化配置:</strong> 业务人员可在预设模板基础上，通过配置界面修改和创建助手。</li>
+                        <li><strong>L2 - 可视化编排:</strong> 业务人员可通过拖拽方式，可视化地编排对话流和简单业务流程。</li>
+                        <li><strong>L3 - 生态化共建:</strong> 平台提供开放市场，鼓励共同贡献、分享和复用Agent模板与组件。</li>
+                    </ul>
+                </div>
+                <!-- Dimension 4: Connectivity -->
+                <div class="card p-6">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-network-wired text-2xl text-emerald-500"></i>
+                        <h3 class="card-title">生态连接 - <span class="text-base font-normal text-gray-500 dark:text-gray-400">能连多少</span></h3>
+                    </div>
+                    <ul class="mt-4 space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+                        <li><strong>L1 - 标准化接入:</strong> 提供标准化的连接器，能快速接入同类系统。</li>
+                        <li><strong>L2 - 平台化网关:</strong> 建立统一能力接入网关，支持连接更多企业内部系统。</li>
+                        <li><strong>L3 - 开放生态:</strong> 提供开放API/SDK，支持双向集成，形成内外联动的协作网络。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Roadmap -->
+        <section id="roadmap" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">分阶段实施路线图</h2>
+                <p class="section-subtitle">我们将分阶段推进这个项目，确保每一步的投入都有清晰的回报，最终实现宏伟蓝图。</p>
+            </div>
+            <div class="mt-12 mb-16 bg-amber-50 border-l-4 border-amber-400 p-6 rounded-lg dark:bg-amber-900/20 dark:border-amber-500">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-magnifying-glass-chart text-2xl text-amber-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-bold text-amber-900 dark:text-amber-200">现状：分析与问题识别</h3>
+                        <div class="mt-2 text-amber-800 dark:text-amber-300">
+                            <p class="mb-2"><strong>当前状态：</strong>现有 <strong>2</strong> 款游戏已接入独立的AI助手，均为<code class="keyword">“烟囱式”独立开发</code>。能力局限于<code class="keyword">“被动式问答”</code>，依赖第三方知识库，不具备主动沟通或工具调用能力。</p>
+                             <p><strong>核心痛点：</strong></p>
+                             <ul class="list-disc list-inside mt-1 space-y-1">
+                                <li><span class="font-semibold">重复建设，成本高昂：</span>每接入新游戏或场景，都需从零开始开发。</li>
+                                <li><span class="font-semibold">能力无法复用：</span>成功的经验、AI能力、沉淀的知识无法共享。</li>
+                                <li><span class="font-semibold">运营效率低下：</span>知识库分散且依赖第三方，运营无法自主高效管理。</li>
+                                <li><span class="font-semibold">服务模式单一：</span>纯被动响应无法满足复杂运营需求，价值天花板低。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-12">
+                <!-- Stage 1 -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="flex items-center justify-center w-12 h-12 bg-emerald-100 dark:bg-emerald-900 rounded-full text-emerald-600 dark:text-emerald-300 font-bold text-2xl">1</span>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">第一阶段：试点突破 <span class="text-base font-normal text-gray-500">(6-9个月)</span></h3>
+                            <p class="text-gray-600 dark:text-gray-400">聚焦“游戏运营助手”的平台化升级与能力增强</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i>能力定位与演进</h4>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">将手工作坊升级为标准化流水线，解决降本增效问题的同时，快速验证主动服务的业务价值。</p>
+                                <div class="mt-4 space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+                                    <p><strong class="text-gray-700 dark:text-gray-300">自主性 (L1→L2):</strong> 核心发展<code class="keyword">L1-流程化</code>，实现引导式多步对话；同步探索<code class="keyword">L2-主动式</code>，基于玩家行为主动提示。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">智能决策 (L1→L2):</strong> 核心发展<code class="keyword">L1-逻辑推理</code>，夯实对话基础；同步探索<code class="keyword">L2-策略推荐</code>，引入简单个性化逻辑。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">使用成本 (L1):</strong> 核心发展<code class="keyword">L1-模板化配置</code>，构建SaaS后台，让运营通过界面配置助手，解决重复建设痛点。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">生态连接 (L2):</strong> 核心发展<code class="keyword">L2-平台化网关</code>雏形，实现多租户（游戏）的标准化、低成本快速接入。</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-list-check"></i>核心任务</h4>
+                                <ul class="mt-2 space-y-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                    <li><strong>平台架构升级:</strong> 重构为模块化、可配置的<code class="keyword">SaaS</code>服务，支持多游戏管理。</li>
+                                    <li><strong>功能能力拓展:</strong> 引入更复杂的语义理解和多轮对话管理。</li>
+                                    <li><strong>探索个性化服务:</strong> 基于玩家画像尝试推荐不同攻略或活动。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-trophy"></i>预期成果</h4>
+                             <ul class="mt-2 space-y-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                <li>成功将现有助手迁移至新<code class="keyword">SaaS</code>平台架构，服务1-2款核心游戏。</li>
+                                <li>新游戏接入配置时间缩短至<span class="font-bold">数天内</span>。</li>
+                                <li>多轮对话成功率达到<span class="font-bold">70%</span>以上，初步实现个性化互动。</li>
+                                <li>验证SaaS架构的可行性和复用价值，为下阶段奠定基础。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Stage 2 -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="flex items-center justify-center w-12 h-12 bg-emerald-100 dark:bg-emerald-900 rounded-full text-emerald-600 dark:text-emerald-300 font-bold text-2xl">2</span>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">第二阶段：通用化赋能</h3>
+                            <p class="text-gray-600 dark:text-gray-400">从“专用工具”到“通用平台”</p>
+                        </div>
+                    </div>
+                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i>能力定位与演进</h4>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">将已验证能力抽象并产品化，使平台从“游戏专用工具”升级为“企业通用平台”，赋能新业务部门。</p>
+                                <div class="mt-4 space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+                                    <p><strong class="text-gray-700 dark:text-gray-300">自主性 (L2):</strong> 核心发展<code class="keyword">L2-主动式</code>，将主动服务能力产品化、通用化，实现从“被动”到“主动”的关键跨越。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">智能决策 (L2):</strong> 核心发展<code class="keyword">L2-策略推荐</code>，建立统一用户画像与个性化引擎，驱动有商业价值的精准策略推荐。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">使用成本 (L2):</strong> 核心发展<code class="keyword">L2-可视化编排</code>，提供拖拽式工作流与对话流编排工具，赋能非技术人员。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">生态连接 (L2):</strong> 核心发展<code class="keyword">L2-平台化网关</code>，正式建成并扩展统一能力网关，打通核心内部系统。</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-list-check"></i>核心任务</h4>
+                                 <ul class="mt-2 space-y-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                    <li><strong>能力抽象与通用化：</strong>提炼核心AI能力，支持多元业务场景（如HR、IT）。</li>
+                                    <li><strong>扩展连接能力：</strong>对接核心办公系统，为<code class="keyword">主动服务</code>奠基。</li>
+                                    <li><strong>构建模板市场：</strong>创建客服、HR助手模板，降低新业务部门使用门槛。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                           <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-trophy"></i>预期成果</h4>
+                             <ul class="mt-2 space-y-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                <li>“企业级智能助手平台”1.0版上线。</li>
+                                <li>成功赋能<span class="font-bold">2-3个新业务部门</span>（含游戏）。</li>
+                                <li>支持他们自主配置和管理不同类型的智能助手。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Stage 3 -->
+                <div class="card p-8">
+                     <div class="flex items-center gap-4 mb-4">
+                        <span class="flex items-center justify-center w-12 h-12 bg-emerald-100 dark:bg-emerald-900 rounded-full text-emerald-600 dark:text-emerald-300 font-bold text-2xl">3</span>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">第三阶段：生态化运营</h3>
+                            <p class="text-gray-600 dark:text-gray-400">从“中央平台”到“赋能生态”</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-bullseye"></i>能力定位与演进</h4>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">推动平台成为企业AI能力的核心中枢与创新孵化器，让智能化深入企业运营的毛细血管。</p>
+                                <div class="mt-4 space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+                                    <p><strong class="text-gray-700 dark:text-gray-300">自主性 (L3):</strong> 核心发展<code class="keyword">L3-协作式</code>，Agent可自主规划、调用工具，执行跨系统复杂任务，成为数字员工。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">智能决策 (L3):</strong> 核心发展<code class="keyword">L3-目标驱动规划</code>，基于融合数据与深度画像，理解模糊目标并自主规划行动策略。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">使用成本 (L3):</strong> 核心发展<code class="keyword">L3-生态化共建</code>，建立能力与模板市场，赋能“人人皆是Agent构建师”。</p>
+                                    <p><strong class="text-gray-700 dark:text-gray-300">生态连接 (L3):</strong> 核心发展<code class="keyword">L3-开放生态</code>，提供成熟API/SDK支持双向调用，形成内外联动的智能协作网络。</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-list-check"></i>核心任务</h4>
+                                 <ul class="mt-2 space-y-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                    <li><strong>全面推广应用：</strong>在HR、IT、财务、销售等更多部门落地。</li>
+                                    <li><strong>建立模板与组件市场：</strong>促进能力复用，降低使用门槛。</li>
+                                    <li><strong>持续运营迭代：</strong>赋能业务人员成为“Agent构建师”。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                           <h4 class="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-trophy"></i>预期成果</h4>
+                             <ul class="mt-2 space-y-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                <li>“人人皆可构建，处处皆有助手”，智能化成为公司日常运营的基石。</li>
+                                <li>核心指标达成或超过项目总体目标。</li>
+                                <li>平台成为企业AI能力和数据资产的核心中心，构筑长期竞争优势。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MVP Plan -->
+        <section id="mvp" class="mb-24 fade-in-section">
+            <div class="text-center">
+                <h2 class="section-title">首个MVP版本详细计划 (3个月)</h2>
+                <p class="section-subtitle">冲锋的号角已经吹响，这是我们迈向成功的第一步。</p>
+            </div>
+            <!-- MVP Strategic Positioning -->
+            <div class="mt-12 mb-12 p-6 border-l-4 border-emerald-500 bg-emerald-50 rounded-r-lg dark:bg-gray-900 dark:border-emerald-500">
+                <h3 class="text-xl font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-3"><i class="fa-solid fa-flag-checkered"></i>MVP版本说明</h3>
+                <p class="mt-3 text-gray-700 dark:text-gray-300">
+                    本次MVP其核心价值在于：<strong class="text-gray-800 dark:text-white">验证核心技术架构</strong>、以及<strong class="text-gray-800 dark:text-white">建立内外部信心</strong>。一切设计都将围绕“用最小的代价，跑通一个从‘助手配置’到‘玩家服务’再到‘数据反馈’的完整业务闭环”这一原则展开。
+                </p>
+            </div>
+            <h3 class="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">MVP 三大核心目标</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <div class="flex items-center">
+                        <span class="flex-shrink-0 inline-flex justify-center items-center h-[46px] w-[46px] rounded-full border-4 border-emerald-50 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:border-emerald-800 dark:text-emerald-300">
+                            <i class="fa-solid fa-desktop text-xl"></i>
+                        </span>
+                        <h3 class="ml-4 font-bold text-gray-800 dark:text-white">平台可见</h3>
+                    </div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">上线基础<code class="keyword">SaaS</code>平台与运营工作台，支持运营人员无代码配置助手。</p>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center">
+                        <span class="flex-shrink-0 inline-flex justify-center items-center h-[46px] w-[46px] rounded-full border-4 border-emerald-50 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:border-emerald-800 dark:text-emerald-300">
+                            <i class="fa-solid fa-headset text-xl"></i>
+                        </span>
+                        <h3 class="ml-4 font-bold text-gray-800 dark:text-white">服务可见</h3>
+                    </div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">实现核心“被动响应”场景，有效处理2-3个高频运营问题。</p>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center">
+                        <span class="flex-shrink-0 inline-flex justify-center items-center h-[46px] w-[46px] rounded-full border-4 border-emerald-50 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:border-emerald-800 dark:text-emerald-300">
+                            <i class="fa-solid fa-heart-pulse text-xl"></i>
+                        </span>
+                        <h3 class="ml-4 font-bold text-gray-800 dark:text-white">关怀可见</h3>
+                    </div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">验证关键“主动关怀”场景，如基于事件自动发送祝贺消息。</p>
+                </div>
+            </div>
+            
+            <!-- MVP Core Deliverables -->
+            <div class="mt-16 space-y-8">
+                 <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">MVP 核心交付物</h3>
+                    <p class="section-subtitle !mt-1">聚焦于平台与AI能力的双重验证</p>
+                </div>
+                <!-- NEW: SaaS Platform & Visualization -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3"><i class="fa-solid fa-layer-group text-emerald-500"></i>SaaS平台与运营工作台建设 (平台雏形 v0.1)</h3>
+                    <p class="mb-4 text-gray-600 dark:text-gray-400"><strong>技术实现逻辑:</strong> 搭建一个可用的SaaS平台骨架，核心是服务于单个助手实例的创建、配置和监控，为后续所有平台化能力奠定基础。</p>
+                    <div class="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <li><strong>基础数据看板：</strong>一个简洁的仪表盘，展示助手调用量、知识库命中率等核心指标。</li>
+                        <li><strong>知识库管理界面：</strong>一个表格页面，运营人员可以在此对FAQ知识进行增、删、改、查，并支持批量导入。</li>
+                        <li><strong>对话脚本编辑器：</strong>一个带有语法高亮的文本编辑区域，用于运营或技术人员粘贴和管理<code class="keyword">YAML/JSON</code>格式的对话流脚本。</li>
+                        <li><strong>渠道部署页面：</strong>显示为不同渠道（如游戏内H5、企业微信）生成的部署代码片段或配置信息。</li>
+                        <li><strong>......</strong></li>
+                    </div>
+                </div>
+                <!-- MOVED: MVP AI Capability -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3"><i class="fa-solid fa-brain text-emerald-500"></i>底层AI基础能力建设 (AI平台雏形 v0.1)</h3>
+                    <p class="mb-4 text-gray-600 dark:text-gray-400"><strong>Agent能力目标:</strong> 聚焦被动响应 (<code class="keyword">RAG</code>) 和简单主动关怀 (事件驱动)。</p>
+                    <div class="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">NLU服务 (v0.1 - 场景聚焦)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 基于 <code class="keyword">Langchain</code> 框架开发意图识别和实体提取能力，封装成初步服务。</p>
+                               <p><strong>关键路径:</strong> 明确场景 → LLM提示词构建 → 提供简单API。</p>
+                           </div>
+                        </details>
+                        <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">DM服务 (v0.1 - 脚本驱动)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 构建对话脚本解释器（支持<code class="keyword">JSON/YAML</code>），根据NLU结果加载并执行对应脚本。</p>
+                               <p><strong>关键路径:</strong> 定义脚本格式 → 开发脚本解释器 → 实现状态管理。</p>
+                           </div>
+                        </details>
+                        <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">LLM集成服务 (v0.1 - RAG核心)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 重点实现<code class="keyword">RAG</code>框架，负责问题向量化、知识检索、Prompt组合、调用LLM API。</p>
+                               <p><strong>关键路径:</strong> LLM API选型与接入 → RAG流程实现 → Prompt设计。</p>
+                           </div>
+                        </details>
+                        <details class="group">
+                            <summary class="flex items-center justify-between cursor-pointer list-none">
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">知识管理服务 (KMS v0.1)</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                                <p><strong>技术实现:</strong> 后端提供知识的增删改查接口，支持运营人员在后台上传和管理知识。接入火山/dify知识库/自己的向量数据库（适配层快速切换）。提供高效的语义检索API供LLM集成服务调用。</p>
+                                <p><strong>关键路径:</strong> 选型向量数据库 -> 实现知识导入与向量化 -> 开发检索API。</p>
+                            </div>
+                         </details>
+                        <details class="group">
+                            <summary class="flex items-center justify-between cursor-pointer list-none">
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">事件订阅与简单规则引擎 (v0.1)</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                                <p><strong>技术实现:</strong> 提供一个API接口，供游戏后端推送特定业务事件（如玩家升级）。内置一个轻量级规则匹配逻辑，根据运营后台配置的“事件-动作”规则，触发DM执行相应的主动消息发送脚本。</p>
+                                <p><strong>关键路径:</strong> 定义事件API -> 开发规则匹配逻辑 -> 与DM联动。</p>
+                            </div>
+                         </details>
+                    </div>
+                </div>
+            </div>
+            <!-- AI Capability Path (Post-MVP) -->
+            <div class="mt-24 space-y-8">
+                <div class="text-center">
+                    <h2 class="section-title">MVP后各阶段AI能力实现路径</h2>
+                    <p class="section-subtitle">在MVP成功的基础上，清晰规划后续每个阶段AI能力的建设重点，确保技术与业务同步演进。</p>
+                </div>
+                
+                <!-- AI Path: Stage 1 -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3"><i class="fa-solid fa-rocket text-emerald-500"></i>第一阶段 (AI平台基础 v1.0)</h3>
+                    <p class="mb-4 text-gray-600 dark:text-gray-400"><strong>Agent能力目标:</strong> 支持更复杂的引导式流程对话和初步个性化推荐，并为多款游戏快速部署助手。</p>
+                    <div class="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <details class="group">
+                            <summary class="flex items-center justify-between cursor-pointer list-none">
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">SaaS平台与运营工作台演进</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                                <p><strong>技术实现:</strong> 支持多游戏/多助手实例管理，实现配置隔离与共享，并引入初步的权限管理。</p>
+                            </div>
+                        </details>
+                        <details class="group">
+                            <summary class="flex items-center justify-between cursor-pointer list-none">
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">NLU服务 (v1.0 - 模型优化与服务化)</span>
+                                <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                                <p><strong>技术实现:</strong> 提升意图识别和实体提取的准确率和泛化能力。将NLU彻底封装为独立的、可配置的微服务，供不同游戏实例共享和调用。</p>
+                            </div>
+                        </details>
+                        <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">DM服务 (v1.0 - 复杂逻辑支持)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 增强对话脚本解释器，支持条件判断、循环、变量传递和“调用子脚本/子流程”机制，实现复杂分支对话。</p>
+                           </div>
+                        </details>
+                        <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">LLM集成服务 (v1.0 - Prompt工程与管理)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 建立初步的Prompt模板库和管理机制，针对不同场景优化Prompt。探索更精细化的RAG策略（如多路召回、答案重排）。</p>
+                           </div>
+                        </details>
+                        <details class="group">
+                        <summary class="flex items-center justify-between cursor-pointer list-none">
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">用户理解与个性化引擎 (雏形 v0.1)</span>
+                            <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                            <p><strong>技术实现:</strong> 收集用户行为数据和关键标签，基于简单用户分群和规则引擎实现个性化内容触达。</p>
+                        </div>
+                        </details>
+                    </div>
+                </div>
+                <!-- AI Path: Stage 2 -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3"><i class="fa-solid fa-puzzle-piece text-emerald-500"></i>第二阶段 (企业级智能助手平台 v1.0)</h3>
+                    <p class="mb-4 text-gray-600 dark:text-gray-400"><strong>Agent能力目标:</strong> 赋能新业务部门（如HR/IT），实现基于事件的智能主动服务，并提供Agent模板。</p>
+                    <div class="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                         <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">DM服务 (v2.0 - 可视化与策略化)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 探索提供简化版可视化对话流设计工具，并引入业务策略模型。DM能动态判断并调用子对话或触发<code class="keyword">Workflow</code>来补全信息。</p>
+                           </div>
+                        </details>
+                         <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">企业知识中枢 (KMS v2.0 - 知识融合)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 支持接入更广泛的企业数据源（如钉钉文档），开始构建基础的企业知识图谱。</p>
+                           </div>
+                        </details>
+                         <details class="group">
+                           <summary class="flex items-center justify-between cursor-pointer list-none">
+                               <span class="font-semibold text-gray-700 dark:text-gray-300">智能流程自动化引擎 (雏形 v1.0)</span>
+                               <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                           </summary>
+                           <div class="mt-2 pl-4 text-sm text-gray-600 dark:text-gray-400 border-l-2 border-gray-200 dark:border-gray-700">
+                               <p><strong>技术实现:</strong> 增强事件总线能力，订阅企业系统事件。支持通过简单配置，串联AI能力和API调用，实现初步的流程自动化。</p>
+                           </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 dark:bg-gray-900/50 mt-20">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>企业级智能助手平台战略规划方案</p>
+            <p class="mt-1">&copy; 2024 Your Company. All Rights Reserved. | Visualized by AI.</p>
+        </div>
+    </footer>
+
+    <!-- Preline UI & Custom Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.1.0/dist/preline.min.js"></script>
+    <script>
+        // Dark/Light Mode Theme Switcher Logic
+        const HSDarkMode = {
+            init() {
+                this.collection = document.querySelectorAll('.hs-dark-mode');
+                if (!this.collection.length) return;
+                const storedTheme = localStorage.getItem('hs_theme');
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.hsDarkMode = storedTheme ? storedTheme : (systemPrefersDark ? 'dark' : 'light');
+                this.setTheme();
+                this.addEvents();
+
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    if (!localStorage.getItem('hs_theme')) {
+                        this.hsDarkMode = e.matches ? 'dark' : 'light';
+                        this.setTheme();
+                    }
+                });
+            },
+            
+            addEvents() {
+                this.collection.forEach(el => {
+                    el.addEventListener('click', () => {
+                        this.hsDarkMode = this.hsDarkMode === 'dark' ? 'light' : 'dark';
+                        this.setTheme(true);
+                    })
+                })
+            },
+
+            setTheme(isManual = false) {
+                if (isManual) {
+                  localStorage.setItem('hs_theme', this.hsDarkMode);
+                }
+                if (this.hsDarkMode === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            HSDarkMode.init();
+
+            // Fade-in animation on scroll
+            const sections = document.querySelectorAll('.fade-in-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

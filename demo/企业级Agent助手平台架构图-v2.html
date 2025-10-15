@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业级智能助手构建平台 - 架构总览 V3.2</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <style type="text/tailwindcss">
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
+        body {
+            @apply bg-gray-100 dark:bg-black antialiased;
+        }
+        
+        .slide {
+            @apply bg-white dark:bg-black text-gray-800 dark:text-gray-200 shadow-2xl dark:shadow-emerald-500/10;
+        }
+
+        .accent-color {
+            @apply text-emerald-500 dark:text-emerald-400;
+        }
+        
+        .arch-box {
+            @apply border border-gray-300 dark:border-gray-700 p-3 rounded-lg flex flex-col justify-center items-center text-center transition-all duration-300 h-full bg-white dark:bg-black;
+        }
+        .arch-box h3 {
+             @apply font-semibold text-gray-800 dark:text-gray-200 text-xs lg:text-sm leading-tight;
+        }
+        .arch-box .subtext {
+            @apply text-[9px] lg:text-[10px] text-gray-400 dark:text-gray-500 mt-1 whitespace-nowrap;
+        }
+        .feature-box {
+            @apply text-[9px] lg:text-[10px] bg-gray-100 dark:bg-gray-800/80 rounded-md px-2 py-1 text-gray-600 dark:text-gray-300 whitespace-nowrap leading-tight;
+        }
+        .connector-line {
+            @apply absolute left-1/2 -translate-x-1/2 w-px bg-gray-300 dark:bg-gray-700;
+        }
+        .arrow-up {
+            @apply absolute left-1/2 -translate-x-1/2 top-[-2px] w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-400 dark:border-b-gray-600;
+        }
+        .container-label { /* For the main gray container */
+            @apply absolute -top-3 left-6 bg-white dark:bg-black px-2 text-xs font-bold tracking-wide text-gray-500 dark:text-gray-400;
+        }
+        .pillar-title-label { /* For the emerald pillar titles */
+            @apply absolute -top-3 left-6 bg-white dark:bg-black px-2 text-xs lg:text-xs font-bold accent-color tracking-wide;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
+                    },
+                    colors: {
+                       emerald: {
+                           400: '#34d399',
+                           500: '#10b981',
+                       },
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="dark">
+
+    <button id="theme-toggle" type="button" class="fixed bottom-4 right-4 z-50 p-2 rounded-full bg-gray-700/50 dark:bg-white/10 backdrop-blur-sm text-white dark:text-white hover:bg-gray-600/70 dark:hover:bg-white/20 transition-colors duration-200">
+        <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.121-3.536a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM3.05 4.95a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zm9.9 0a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4.464 14.95l-.707.707a1 1 0 001.414 1.414l.707-.707a1 1 0 00-1.414-1.414z"></path></svg>
+    </button>
+    
+    <main id="slide-1" class="min-h-screen w-full flex items-center justify-center p-4 lg:p-8">
+        <div class="slide w-full max-w-7xl aspect-video flex flex-col p-6 lg:p-8 border border-gray-200 dark:border-gray-800 rounded-xl">
+            
+            <header class="flex justify-between items-start pb-4 border-b border-gray-200 dark:border-gray-800">
+                <div>
+                    <div class="flex items-center gap-3">
+                         <div class="w-4 h-4 bg-emerald-500 rounded-md"></div>
+                         <h1 class="text-2xl lg:text-3xl font-black tracking-tight uppercase">企业级智能助手构建平台</h1>
+                    </div>
+                    <p class="text-sm lg:text-base text-gray-500 dark:text-gray-400 mt-1">Enterprise AI Assistant Platform - Architecture Overview V3.2</p>
+                </div>
+                 <div class="text-right flex-shrink-0 hidden sm:block">
+                    <p class="font-mono text-xs lg:text-sm text-gray-400 dark:text-gray-500">SYSTEM ARCHITECTURE</p>
+                    <p class="font-mono text-xs text-gray-400 dark:text-gray-500">VERSION 2025.Q2</p>
+                </div>
+            </header>
+
+            <div class="flex-grow mt-4 lg:mt-6 overflow-hidden">
+                 <div class="w-full h-full flex flex-col items-center justify-start space-y-3 lg:space-y-4 select-none">
+                    <!-- Layer 0: Business Value Layer -->
+                    <div class="text-center w-full">
+                        <h4 class="text-[10px] lg:text-xs font-bold tracking-wider uppercase text-emerald-500">商业价值层</h4>
+                        <div class="grid grid-cols-5 gap-2 mt-1">
+                            <div class="arch-box !p-2 bg-emerald-500/10 border-emerald-500/30"><h3>数据洞察分析</h3><p class="subtext">[e.g. Data Agent]</p></div>
+                            <div class="arch-box !p-2 bg-emerald-500/10 border-emerald-500/30"><h3>员工提效</h3><p class="subtext">[e.g. HR Agent]</p></div>
+                            <div class="arch-box !p-2 bg-emerald-500/10 border-emerald-500/30"><h3>赋能智能决策</h3><p class="subtext">[e.g. Decision Agent]</p></div>
+                            <div class="arch-box !p-2 bg-emerald-500/10 border-emerald-500/30"><h3>自动化营销</h3><p class="subtext">[e.g. Ops Agent]</p></div>
+                            <div class="arch-box !p-2 bg-emerald-500/10 border-emerald-500/30"><h3>客户服务</h3><p class="subtext">[e.g. Support Agent]</p></div>
+                        </div>
+                    </div>
+                     <div class="relative h-2 w-full"><div class="connector-line h-full"></div><div class="arrow-up"></div></div>
+                    <div class="grid grid-cols-4 gap-2 w-full">
+                        <div class="arch-box !p-2 !flex-row !gap-1.5 bg-gray-50 dark:bg-gray-800/50"><h3>Web/H5</h3></div>
+                        <div class="arch-box !p-2 !flex-row !gap-1.5 bg-gray-50 dark:bg-gray-800/50"><h3>App SDK</h3></div>
+                        <div class="arch-box !p-2 !flex-row !gap-1.5 bg-gray-50 dark:bg-gray-800/50"><h3>钉钉/企微</h3></div>
+                        <div class="arch-box !p-2 !flex-row !gap-1.5 bg-gray-50 dark:bg-gray-800/50"><h3>API</h3></div>
+                    </div>
+
+                    <!-- Platform Core Services Container -->
+                    <div class="relative w-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4 pt-8 space-y-3">
+                         <div class="container-label">平台核心服务</div>
+                         
+                         <!-- Pillar 3 -->
+                         <div class="relative w-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4 pt-8 space-y-2">
+                             <h3 class="pillar-title-label">开放生态与运营管理平台</h3>
+                             <div class="grid grid-cols-3 gap-2">
+                                 <div class="arch-box"><h3 class="text-center">统一能力接入与适配网关</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">能力适配</span><span class="feature-box">组件市场</span></div></div>
+                                 <div class="arch-box"><h3 class="text-center">一体化智能运营与分析</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">实时监控</span><span class="feature-box">数据分析</span></div></div>
+                                 <div class="arch-box"><h3 class="text-center">平台基础与安全保障</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">统一认证</span><span class="feature-box">安全凭证</span></div></div>
+                             </div>
+                         </div>
+                         
+                         <div class="relative h-2 w-full"><div class="connector-line h-full"></div></div>
+
+                         <!-- Pillar 2 -->
+                         <div class="relative w-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4 pt-8 space-y-2">
+                            <h3 class="pillar-title-label">智能体构建与流程编排中心</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="arch-box"><h3 class="text-center">低代码/无代码构建工作台</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">创建向导</span><span class="feature-box">助手模板</span></div></div>
+                                <div class="arch-box"><h3 class="text-center">智能流程自动化引擎</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">可视化编排</span><span class="feature-box">MCP协同</span></div></div>
+                            </div>
+                         </div>
+                         
+                         <div class="relative h-2 w-full"><div class="connector-line h-full"></div></div>
+
+                         <!-- Pillar 1 -->
+                         <div class="relative w-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4 pt-8 space-y-2">
+                            <h3 class="pillar-title-label">智能认知与决策引擎</h3>
+                            <div class="grid grid-cols-5 gap-2">
+                                <div class="arch-box"><h3 class="text-center">多维NLU</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">意图识别</span></div></div>
+                                <div class="arch-box"><h3 class="text-center">动态DM</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">上下文维护</span></div></div>
+                                <div class="arch-box"><h3 class="text-center">LLM赋能</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">RAG框架</span></div></div>
+                                <div class="arch-box"><h3 class="text-center">企业知识中枢</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">知识图谱</span></div></div>
+                                <div class="arch-box"><h3 class="text-center">深度用户理解</h3><div class="flex flex-wrap justify-center gap-1.5 mt-2"><span class="feature-box">360°画像</span></div></div>
+                            </div>
+                         </div>
+                    </div>
+
+                    <!-- Infrastructure Layer -->
+                    <div class="text-center w-full">
+                        <div class="relative h-2 w-full"><div class="connector-line h-full"></div><div class="arrow-up"></div></div>
+                        <h4 class="text-[10px] lg:text-xs font-bold tracking-wider uppercase text-gray-500">基础设施层</h4>
+                        <div class="grid grid-cols-4 gap-2 mt-1">
+                            <div class="arch-box !flex-row !gap-2 !p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V19.5m0 2.25l-2.25-1.313m0-16.875L12 2.25l2.25 1.313M12 7.5V5.25" /></svg><h3>第三方模型</h3></div>
+                            <div class="arch-box !flex-row !gap-2 !p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18h16.5a1.5 1.5 0 011.5 1.5v16.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 19.5V4.5A1.5 1.5 0 013.75 3z" /></svg><h3>内部系统</h3></div>
+                            <div class="arch-box !flex-row !gap-2 !p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375" /></svg><h3>数据源</h3></div>
+                            <div class="arch-box !flex-row !gap-2 !p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" /></svg><h3>开源工具</h3></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+            const htmlEl = document.documentElement;
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    htmlEl.classList.add('dark');
+                    lightIcon.classList.remove('hidden');
+                    darkIcon.classList.add('hidden');
+                } else {
+                    htmlEl.classList.remove('dark');
+                    darkIcon.classList.remove('hidden');
+                    lightIcon.classList.add('hidden');
+                }
+            };
+
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(currentTheme);
+
+            themeToggleBtn.addEventListener('click', () => {
+                const newTheme = htmlEl.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识库管理 - 原型</title>
+
+    <!-- Tailwind CSS v4 (必需) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- daisyUI v5 (必需) -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+
+    <!-- Lucide Icons (推荐图标库) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* 解决“滚动条间隙 (scrollbar gap)” 问题，确保页面宽度在内容切换时不跳动 */
+        html {
+            overflow-y: scroll;
+        }
+
+        /* 开发者注释按钮的自定义定位 */
+        .dev-note-container {
+            position: relative;
+        }
+
+        .dev-note-btn {
+            position: absolute;
+            top: -0.5rem; /* -8px */
+            right: -0.5rem; /* -8px */
+        }
+    </style>
+</head>
+
+<body class="bg-base-200 font-sans">
+
+    <!-- 主布局容器 -->
+    <div class="flex h-screen">
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <main class="p-4 sm:p-6 lg:p-8 flex-1">
+
+                <!-- 页面头部 -->
+                <header class="mb-6">
+                    <!-- 面包屑导航 -->
+                    <div class="text-sm breadcrumbs mb-2">
+                        <ul>
+                            <li><a><i data-lucide="home" class="w-4 h-4 mr-1"></i>主页</a></li>
+                            <li><span class="font-semibold text-primary"><i data-lucide="library" class="w-4 h-4 mr-1"></i>知识库</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- 标题与操作区 -->
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
+                            <span class="text-primary">📚</span>
+                            知识库管理
+                        </h1>
+                        
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <!-- 搜索框 -->
+                            <div class="dev-note-container w-full md:w-64">
+                                <label class="input input-bordered flex items-center gap-2">
+                                    <input type="text" class="grow" placeholder="按名称搜索知识库..." />
+                                    <i data-lucide="search" class="w-4 h-4 opacity-70"></i>
+                                </label>
+                                <button class="btn btn-xs btn-circle btn-accent z-10 shadow-lg hover:scale-110 transition-transform dev-note-btn" onclick="showDeveloperNote('note_search', 'Note #1: 实时搜索交互')">1</button>
+                            </div>
+                            <!-- 管理按钮 -->
+                            <div class="dev-note-container">
+                                <button class="btn btn-ghost" onclick="unified_permissions_modal.showModal()">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                    管理
+                                </button>
+                                <button class="btn btn-xs btn-circle btn-accent z-10 shadow-lg hover:scale-110 transition-transform dev-note-btn" onclick="showDeveloperNote('note_unified_permissions', 'Note #4: 统一权限管理')">4</button>
+                            </div>
+                            
+                            <!-- 新建按钮 -->
+                            <div class="dev-note-container">
+                                <button class="btn btn-primary" onclick="new_kb_modal.showModal()">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    新建知识库
+                                </button>
+                                <button class="btn btn-xs btn-circle btn-accent z-10 shadow-lg hover:scale-110 transition-transform dev-note-btn" onclick="showDeveloperNote('note_creation', 'Note #2: 模态框创建流程')">2</button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- ============================================================ -->
+                <!-- [S] 动态内容区域: 根据页面状态显示不同内容               -->
+                <!-- 开发者提示: 使用JS控制，一次只显示以下一个div             -->
+                <!-- ============================================================ -->
+
+                <!-- [A] 正常状态: 显示知识库卡片网格 (默认显示) -->
+                <div id="view_normal">
+                    <!-- 知识库卡片网格 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                        
+                        <!-- 卡片 1 -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out dev-note-container group">
+                            <div class="card-body">
+                                <div class="flex justify-between items-start">
+                                    <h2 class="card-title text-lg font-bold flex items-center gap-3 flex-grow pr-2">
+                                        <i data-lucide="book-marked" class="w-6 h-6 text-blue-500 flex-shrink-0"></i>
+                                        产品A用户手册
+                                    </h2>
+                                </div>
+                                <p class="text-base-content/70 mt-1 mb-4 text-sm">关于产品A的核心功能介绍、操作指南与最佳实践。</p>
+                                
+                                <div class="flex items-center text-xs text-base-content/60 space-x-4 mb-4">
+                                    <div class="flex items-center gap-1.5" title="包含的文档数量">
+                                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                                        <span>15 个文档</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5" title="最后更新时间">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                        <span>2天前更新</span>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions mt-auto pt-4 border-t border-base-200">
+                                    <a href="./P_021_document_list.html" class="btn btn-ghost w-full justify-between">
+                                        管理文档
+                                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                    </a>
+                                </div>
+                            </div>
+                             <button class="btn btn-xs btn-circle btn-accent z-10 shadow-lg hover:scale-110 transition-transform dev-note-btn -top-2 -right-2" onclick="showDeveloperNote('note_card_logic', 'Note #3: 卡片组件逻辑')">3</button>
+                        </div>
+
+                        <!-- 卡片 2 -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out group">
+                            <div class="card-body">
+                                <div class="flex justify-between items-start">
+                                    <h2 class="card-title text-lg font-bold flex items-center gap-3 flex-grow pr-2">
+                                        <i data-lucide="life-buoy" class="w-6 h-6 text-green-500 flex-shrink-0"></i>
+                                        售后支持知识库
+                                    </h2>
+                                </div>
+                                <p class="text-base-content/70 mt-1 mb-4 text-sm">解决客户的常见问题、故障排查指南与服务流程。</p>
+                                
+                                <div class="flex items-center text-xs text-base-content/60 space-x-4 mb-4">
+                                    <div class="flex items-center gap-1.5" title="包含的文档数量">
+                                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                                        <span>32 个文档</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5" title="最后更新时间">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                        <span>5小时前更新</span>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions mt-auto pt-4 border-t border-base-200">
+                                    <a href="./P_021_document_list.html" class="btn btn-ghost w-full justify-between">
+                                        管理文档
+                                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 卡片 3 -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out group">
+                            <div class="card-body">
+                                <div class="flex justify-between items-start">
+                                    <h2 class="card-title text-lg font-bold flex items-center gap-3 flex-grow pr-2">
+                                        <i data-lucide="users" class="w-6 h-6 text-purple-500 flex-shrink-0"></i>
+                                        新员工入职指南
+                                    </h2>
+                                </div>
+                                <p class="text-base-content/70 mt-1 mb-4 text-sm">涵盖公司文化、组织架构、行政流程与IT系统使用。</p>
+                                
+                                <div class="flex items-center text-xs text-base-content/60 space-x-4 mb-4">
+                                    <div class="flex items-center gap-1.5" title="包含的文档数量">
+                                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                                        <span>8 个文档</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5" title="最后更新时间">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                        <span>1个月前更新</span>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions mt-auto pt-4 border-t border-base-200">
+                                    <a href="./P_021_document_list.html" class="btn btn-ghost w-full justify-between">
+                                        管理文档
+                                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 更多卡片占位... -->
+                        <div class="card bg-base-100/60 border-2 border-dashed border-base-300">
+                             <div class="card-body items-center justify-center">
+                                <div class="text-center text-base-content/50">
+                                    <i data-lucide="layout-grid" class="w-12 h-12 mx-auto"></i>
+                                    <p class="mt-2 text-sm font-medium">更多知识库...</p>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- 分页与统计 -->
+                    <footer class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 ">
+                        <div class="text-sm text-base-content/60">
+                            显示第 <span class="font-semibold text-base-content">1-10</span> 条，共 <span class="font-semibold text-base-content">50</span> 条
+                        </div>
+                        <div class="join">
+                            <button class="join-item btn btn-sm">«</button>
+                            <button class="join-item btn btn-sm btn-active">1</button>
+                            <button class="join-item btn btn-sm">2</button>
+                            <button class="join-item btn btn-sm">3</button>
+                            <button class="join-item btn btn-sm">...</button>
+                            <button class="join-item btn btn-sm">5</button>
+                            <button class="join-item btn btn-sm">»</button>
+                        </div>
+                    </footer>
+                </div>
+
+                <!-- [B] 加载状态: 显示骨架屏 (默认隐藏) -->
+                <div id="view_loading" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                        <!-- Skeleton Card -->
+                        <div class="card bg-base-100 shadow-md">
+                            <div class="card-body">
+                                <div class="skeleton h-8 w-3/4 mb-4"></div>
+                                <div class="skeleton h-4 w-full mb-1"></div>
+                                <div class="skeleton h-4 w-5/6 mb-6"></div>
+                                <div class="flex space-x-4 mb-6">
+                                    <div class="skeleton h-5 w-20"></div>
+                                    <div class="skeleton h-5 w-24"></div>
+                                </div>
+                                <div class="skeleton h-12 w-full"></div>
+                            </div>
+                        </div>
+                        <!-- Skeleton Card -->
+                        <div class="card bg-base-100 shadow-md">
+                            <div class="card-body">
+                                <div class="skeleton h-8 w-3/4 mb-4"></div>
+                                <div class="skeleton h-4 w-full mb-1"></div>
+                                <div class="skeleton h-4 w-5/6 mb-6"></div>
+                                <div class="flex space-x-4 mb-6">
+                                    <div class="skeleton h-5 w-20"></div>
+                                    <div class="skeleton h-5 w-24"></div>
+                                </div>
+                                <div class="skeleton h-12 w-full"></div>
+                            </div>
+                        </div>
+                        <!-- Skeleton Card -->
+                        <div class="card bg-base-100 shadow-md">
+                            <div class="card-body">
+                                <div class="skeleton h-8 w-3/4 mb-4"></div>
+                                <div class="skeleton h-4 w-full mb-1"></div>
+                                <div class="skeleton h-4 w-5/6 mb-6"></div>
+                                <div class="flex space-x-4 mb-6">
+                                    <div class="skeleton h-5 w-20"></div>
+                                    <div class="skeleton h-5 w-24"></div>
+                                </div>
+                                <div class="skeleton h-12 w-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- [C] 空状态 (初次使用): (默认隐藏) -->
+                <div id="view_empty_initial" class="hidden">
+                    <div class="text-center p-12 border-2 border-dashed border-base-300 rounded-box bg-base-100">
+                        <div class="inline-block p-6 bg-base-200 rounded-full">
+                            <i data-lucide="folder-plus" class="w-16 h-16 text-primary"></i>
+                        </div>
+                        <h2 class="mt-6 text-2xl font-bold">开始创建您的第一个知识库</h2>
+                        <p class="mt-2 text-base-content/70">知识库是您管理所有文档和知识内容的容器。</p>
+                        <div class="mt-8">
+                            <button class="btn btn-primary btn-lg" onclick="new_kb_modal.showModal()">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                                创建知识库
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- [D] 空状态 (搜索无果): (默认隐藏) -->
+                <div id="view_empty_search" class="hidden">
+                    <div class="text-center p-12 border-2 border-dashed border-base-300 rounded-box bg-base-100">
+                        <div class="inline-block p-6 bg-base-200 rounded-full">
+                            <i data-lucide="search-x" class="w-16 h-16 text-warning"></i>
+                        </div>
+                        <h2 class="mt-6 text-2xl font-bold">未找到结果</h2>
+                        <p class="mt-2 text-base-content/70">未找到与 “<span class="font-bold text-base-content" id="search_term_display"></span>” 相关的知识库。请尝试更换关键词。</p>
+                    </div>
+                </div>
+
+                <!-- [E] 错误状态: (默认隐藏) -->
+                <div id="view_error" class="hidden">
+                    <div class="text-center p-12 border-2 border-dashed border-error/20 rounded-box bg-error/5">
+                        <div class="inline-block p-6 bg-error/10 rounded-full">
+                            <i data-lucide="alert-triangle" class="w-16 h-16 text-error"></i>
+                        </div>
+                        <h2 class="mt-6 text-2xl font-bold text-error">哦噢，加载失败了</h2>
+                        <p class="mt-2 text-base-content/70">加载知识库列表失败，请检查您的网络连接或稍后再试。</p>
+                        <div class="mt-8">
+                            <button class="btn btn-primary">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                重试
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- [E] 动态内容区域                                           -->
+                <!-- ============================================================ -->
+
+            </main>
+        </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- [S] 模态框 (Modal Dialogs)                                 -->
+    <!-- ============================================================ -->
+
+    <!-- [1] 新建知识库 Modal -->
+    <dialog id="new_kb_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5 text-primary"></i>新建知识库</h3>
+            <form class="py-4 space-y-4">
+                <div>
+                    <label class="label">
+                        <span class="label-text">知识库名称</span>
+                    </label>
+                    <input type="text" placeholder="例如：产品A用户手册" class="input input-bordered w-full" />
+                </div>
+                <div>
+                    <label class="label">
+                        <span class="label-text">描述 (可选)</span>
+                    </label>
+                    <textarea class="textarea textarea-bordered w-full" rows="3" placeholder="简要描述这个知识库的用途"></textarea>
+                </div>
+            </form>
+            <div class="modal-action">
+                <form method="dialog" class="w-full flex justify-end gap-2">
+                    <button class="btn btn-ghost">取消</button>
+                    <button class="btn btn-primary">创建</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>关闭</button></form>
+    </dialog>
+
+    <!-- [2] 权限与人员管理 Modal -->
+    <dialog id="permissions_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="users-round" class="w-5 h-5 text-primary"></i>权限与人员管理</h3>
+            <p class="py-2 text-sm text-base-content/70">管理“<span class="font-semibold text-base-content">产品A用户手册</span>”的访问权限。</p>
+            
+            <div class="py-4 space-y-4">
+                <!-- 添加新成员 -->
+                <div>
+                    <label class="label"><span class="label-text">添加成员</span></label>
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="搜索用户..." class="input input-bordered w-full" />
+                        <button class="btn btn-primary btn-square"><i data-lucide="plus"></i></button>
+                    </div>
+                </div>
+
+                <!-- 成员列表 -->
+                <div class="divider text-xs">已指派的成员</div>
+                <div class="max-h-60 overflow-y-auto pr-2 space-y-2">
+                    <!-- 成员项 -->
+                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-base-200">
+                        <div class="flex items-center gap-3">
+                            <div class="avatar placeholder">
+                                <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                    <span>张三</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="font-bold">张三</div>
+                                <div class="text-xs opacity-50">zhang.san@example.com</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-ghost">管理员</span>
+                            <button class="btn btn-xs btn-ghost btn-circle text-error"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                     <!-- 成员项 -->
+                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-base-200">
+                        <div class="flex items-center gap-3">
+                            <div class="avatar placeholder">
+                                <div class="bg-primary text-primary-content rounded-full w-8">
+                                    <span>李四</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="font-bold">李四</div>
+                                <div class="text-xs opacity-50">li.si@example.com</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-ghost">运营专员</span>
+                            <button class="btn btn-xs btn-ghost btn-circle text-error"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-action">
+                <form method="dialog" class="w-full flex justify-end gap-2">
+                    <button class="btn btn-ghost">关闭</button>
+                    <button class="btn btn-primary">保存更改</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>关闭</button></form>
+    </dialog>
+
+    <!-- [3] 知识库权限统一管理 Modal -->
+    <dialog id="unified_permissions_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="shield-check" class="w-5 h-5 text-primary"></i>知识库权限统一管理</h3>
+            <p class="py-2 text-sm text-base-content/70">为系统中的任何知识库分配或调整管理员和运营专员角色。</p>
+            
+            <div class="py-4 space-y-6">
+                <!-- 知识库选择器 -->
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">选择要管理的知识库</span></label>
+                    <select class="select select-bordered w-full">
+                        <option disabled selected>请选择...</option>
+                        <option>产品A用户手册</option>
+                        <option>售后支持知识库</option>
+                        <option>新员工入职指南</option>
+                    </select>
+                </div>
+
+                <!-- 权限设置区域 (初始禁用) -->
+                <div class="opacity-50 pointer-events-none" id="permission_setting_area">
+                    <div class="divider text-xs">“<span class="font-bold">...</span>”的权限设置</div>
+                    
+                    <!-- 添加新成员 -->
+                    <div>
+                        <label class="label"><span class="label-text">添加新成员</span></label>
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="搜索用户..." class="input input-bordered w-full" />
+                            <button class="btn btn-primary btn-square"><i data-lucide="plus"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- 成员列表 -->
+                    <div class="mt-4">
+                        <label class="label"><span class="label-text">已指派的成员</span></label>
+                        <div class="max-h-48 overflow-y-auto pr-2 space-y-2">
+                            <!-- 成员项 -->
+                            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-base-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar placeholder"><div class="bg-neutral text-neutral-content rounded-full w-8"><span>张三</span></div></div>
+                                    <div>
+                                        <div class="font-bold">张三</div>
+                                        <div class="text-xs opacity-50">zhang.san@example.com</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-ghost">管理员</span>
+                                    <button class="btn btn-xs btn-ghost btn-circle text-error"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                             <!-- 成员项 -->
+                            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-base-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar placeholder"><div class="bg-primary text-primary-content rounded-full w-8"><span>李四</span></div></div>
+                                    <div>
+                                        <div class="font-bold">李四</div>
+                                        <div class="text-xs opacity-50">li.si@example.com</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-ghost">运营专员</span>
+                                    <button class="btn btn-xs btn-ghost btn-circle text-error"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-action">
+                <form method="dialog" class="w-full flex justify-end gap-2">
+                    <button class="btn btn-ghost">关闭</button>
+                    <button class="btn btn-primary" disabled>保存更改</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>关闭</button></form>
+    </dialog>
+
+    <!-- ============================================================ -->
+    <!-- [E] 模态框 (Modal Dialogs)                                 -->
+    <!-- ============================================================ -->
+
+
+    <!-- 
+    ============================================================
+    开发者注释 (Developer Notes) 功能区
+    ============================================================
+    -->
+
+    <!-- 1. 共享的开发者注释 Modal 结构 -->
+    <dialog id="developer_note_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 id="developer_note_title" class="font-bold text-lg"></h3>
+            <div id="developer_note_content" class="prose prose-sm max-w-none py-4"></div>
+            <div class="modal-action">
+                <form method="dialog"><button class="btn">关闭</button></form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>关闭</button></form>
+    </dialog>
+
+    <!-- 2. 隐藏的注释内容 -->
+    <div style="display:none;">
+        <div id="note_search">
+            <p><strong>用户目标 (User Story):</strong></p>
+            <p>作为一名知识运营专员，当知识库数量很多时，我希望能通过输入关键词来快速筛选列表，以便立即找到我需要管理的那个知识库，而不需要手动浏览和翻页。</p>
+            <p><strong>核心业务规则 (Business Rules):</strong></p>
+            <ul>
+                <li>搜索是实时的，用户输入时列表应立即响应并过滤。</li>
+                <li>搜索范围应至少包含知识库的“名称”。</li>
+            </ul>
+            <p><strong>关键状态与条件 (States & Conditions):</strong></p>
+            <ul>
+                <li><strong>无结果状态:</strong> 如果根据用户的输入找不到任何匹配的知识库，系统必须清晰地告知用户“未找到结果”，并显示他们刚刚搜索的关键词。</li>
+            </ul>
+        </div>
+        <div id="note_creation">
+            <p><strong>用户目标 (User Story):</strong></p>
+            <p>作为知识运营专员，我希望能快速创建一个新的知识库，并且这个过程不应打断我当前浏览列表的上下文。</p>
+            <p><strong>核心业务规则 (Business Rules):</strong></p>
+            <ul>
+                <li>创建一个新的知识库，至少需要提供一个“知识库名称”。</li>
+                <li>知识库名称在系统中必须是唯一的。</li>
+            </ul>
+            <p><strong>边界情况 (Edge Cases):</strong></p>
+            <ul>
+                <li><strong>创建失败:</strong> 如果因为名称重复或网络问题导致创建失败，系统不应该直接关闭创建窗口。必须在当前窗口内提示用户具体的失败原因（例如：“知识库名称已存在”），并保留用户已输入的内容，以便他们修改后重新提交。</li>
+            </ul>
+        </div>
+        <div id="note_card_logic">
+            <p><strong>用户目标 (User Story):</strong></p>
+            <p>作为用户，我希望一目了然地看到每个知识库的核心信息（如名称、文档数、更新时间），并能轻松地进入任何一个知识库进行管理。</p>
+            <p><strong>核心业务规则 (Business Rules):</strong></p>
+            <ul>
+                <li>每张卡片代表一个独立的知识库，并聚合其关键元数据。</li>
+                <li>卡片上必须有一个非常明确的行动号召（如“管理文档”），作为进入该知识库详情页的主要入口。</li>
+                <li>为了提升交互效率，整个卡片区域都应是可点击的，其效果等同于点击“管理文档”按钮。</li>
+            </ul>
+            <p><strong>关键状态与条件 (States & Conditions):</strong></p>
+            <ul>
+                <li><strong>悬停反馈:</strong> 当用户的鼠标悬停在卡片上时，卡片需要有明显的视觉变化（如阴影加深或上浮），以明确告知用户这是一个可交互的元素。</li>
+            </ul>
+        </div>
+        <div id="note_unified_permissions">
+            <p><strong>用户目标 (User Story):</strong></p>
+            <p>作为系统管理员，我需要一个统一的界面来管理所有知识库的权限，而不是逐个进入每个知识库进行设置，以提高管理效率。</p>
+            <p><strong>核心业务规则 (Business Rules):</strong></p>
+            <ul>
+                <li>此功能仅对“系统管理员”角色的用户可见。</li>
+                <li>管理员必须先从列表中选择一个知识库，然后才能查看或修改其权限。</li>
+            </ul>
+            <p><strong>关键状态与条件 (States & Conditions):</strong></p>
+            <ul>
+                <li><strong>初始状态:</strong> 打开窗口时，权限设置区域是禁用的。</li>
+                <li><strong>激活状态:</strong> 只有当管理员成功选择一个知识库后，权限设置区域才会被激活，并加载该知识库当前的人员和角色列表。</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- 3. JavaScript 交互脚本 -->
+    <script>
+        // 初始化 Lucide 图标
+        lucide.createIcons();
+
+        // Developer Notes Modal 控制函数
+        function showDeveloperNote(noteContentId, noteTitle) {
+            const modal = document.getElementById('developer_note_modal');
+            const titleEl = document.getElementById('developer_note_title');
+            const contentEl = document.getElementById('developer_note_content');
+            const noteSourceEl = document.getElementById(noteContentId);
+
+            if (modal && titleEl && contentEl && noteSourceEl) {
+                titleEl.textContent = noteTitle;
+                contentEl.innerHTML = noteSourceEl.innerHTML;
+                modal.showModal();
+            } else {
+                console.error('Developer note elements not found for ID:', noteContentId);
+            }
+        }
+
+        // --- 统一权限管理模态框交互逻辑 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const unifiedModal = document.getElementById('unified_permissions_modal');
+            if (!unifiedModal) return;
+
+            const kbSelector = unifiedModal.querySelector('select');
+            const permissionArea = unifiedModal.querySelector('#permission_setting_area');
+            const saveButton = unifiedModal.querySelector('.btn-primary');
+            const kbNameSpan = permissionArea.querySelector('div.divider span.font-bold');
+
+            if (kbSelector && permissionArea && saveButton && kbNameSpan) {
+                kbSelector.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption && !selectedOption.disabled) {
+                        // An actual knowledge base is selected
+                        permissionArea.classList.remove('opacity-50', 'pointer-events-none');
+                        saveButton.disabled = false;
+                        kbNameSpan.textContent = this.value; // Update the name in the divider
+                    } else {
+                        // The placeholder is selected
+                        permissionArea.classList.add('opacity-50', 'pointer-events-none');
+                        saveButton.disabled = true;
+                        kbNameSpan.textContent = '...'; // Reset the name
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
+

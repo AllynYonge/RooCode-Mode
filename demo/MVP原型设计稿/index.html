@@ -1,0 +1,253 @@
+<!-- START: index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识库原型预览</title>
+  
+  <!-- Tailwind CSS v4 (必需) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  
+  <!-- daisyUI v5 (必需) -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+
+  <!-- Lucide Icons (按需添加) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* 解决 Tailwind v4 预览版中可能存在的 preflight 问题 */
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+
+    /* 用于导航激活状态的自定义样式 */
+    .active-nav-link {
+      background-color: hsl(var(--p)); /* daisyUI primary color */
+      color: hsl(var(--pc)); /* daisyUI primary-content color */
+      border-radius: var(--rounded-btn, 0.5rem);
+    }
+    .active-nav-link:hover {
+        background-color: hsl(var(--p));
+    }
+    .active-nav-link i {
+        color: hsl(var(--pc));
+    }
+
+    /* 确保iframe内容填满其容器 */
+    iframe {
+      display: block;
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* 侧边栏滚动条美化 (可选) */
+    .sidebar-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    .sidebar-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+        background-color: hsl(var(--b-300));
+        border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="overflow-hidden bg-base-300">
+  <div class="drawer lg:drawer-open">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+    
+    <!-- 左侧导航栏 -->
+    <aside class="drawer-side !sticky !top-0 shadow-lg z-40">
+      <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
+      <div class="bg-base-200 text-base-content min-h-full w-64 p-0 flex flex-col">
+        <div class="p-4 border-b border-base-300 sticky top-0 bg-base-200 z-10">
+          <a href="#" class="flex items-center gap-2">
+            <div class="bg-primary p-2 rounded-lg">
+              <i data-lucide="brain-circuit" class="text-primary-content"></i>
+            </div>
+            <span class="text-xl font-bold text-primary">草花 Ai 开发平台</span>
+          </a>
+        </div>
+        <div class="p-4 flex-1 sidebar-scroll" id="navLinksContainer">
+          <!-- Prompt 工程 -->
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2 px-2">知识库</h3>
+            <ul class="menu space-y-1">
+              <li>
+                <a href="javascript:void(0);" class="text-sm" onclick="showFrame('P_020_knowledge_base_list.html', 'Prompt 开发', this)" data-page-url="P_020_knowledge_base_list.html" data-page-name="Prompt 开发">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  知识库管理
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Prompt 工程 -->
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2 px-2">Prompt 工程</h3>
+            <ul class="menu space-y-1">
+              <li>
+                <a href="javascript:void(0);" class="text-sm" onclick="showFrame('P_020_knowledge_base_list.html', 'Prompt 开发', this)" data-page-url="P_020_knowledge_base_list.html" data-page-name="Prompt 开发">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  Prompt 开发
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0);" class="text-sm" data-page-url="P_021_document_list.html" data-page-name="Playground">
+                  <i data-lucide="play" class="w-4 h-4"></i>
+                  Playground
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- 评测 -->
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2 px-2">评测</h3>
+            <ul class="menu space-y-1">
+              <li>
+                <a href="javascript:void(0);" class="text-sm" data-page-url="P_022_knowledge_item_list.html" data-page-name="评测集">
+                  <i data-lucide="database" class="w-4 h-4"></i>
+                  评测集
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0);" class="text-sm">
+                  <i data-lucide="help-circle" class="w-4 h-4"></i>
+                  评估器
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0);" class="text-sm">
+                  <i data-lucide="flask-conical" class="w-4 h-4"></i>
+                  实验
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- 观测 -->
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2 px-2">观测</h3>
+            <ul class="menu space-y-1">
+              <li>
+                <a href="javascript:void(0);" class="text-sm">
+                  <i data-lucide="activity" class="w-4 h-4"></i>
+                  Trace
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0);" class="text-sm">
+                  <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                  统计
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0);" class="text-sm">
+                  <i data-lucide="calendar" class="w-4 h-4"></i>
+                  自动化任务
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- 模型 -->
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2 px-2">模型</h3>
+            <ul class="menu space-y-1">
+              <li>
+                <a href="javascript:void(0);" class="text-sm">
+                  <i data-lucide="settings" class="w-4 h-4"></i>
+                  模型管理
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- MCP -->
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2 px-2">MCP</h3>
+            <ul class="menu space-y-1">
+              <li>
+                <a href="javascript:void(0);" class="text-sm">
+                  <i data-lucide="settings" class="w-4 h-4"></i>
+                  MCP服务
+                </a>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+         <div class="p-4 border-t border-base-300 sticky bottom-0 bg-base-200">
+            <div class="dropdown dropdown-top w-full">
+                <div tabindex="0" role="button" class="btn btn-outline w-full justify-start">
+                    <div class="avatar">
+                        <div class="w-8 rounded-full">
+                            <img src="https://source.unsplash.com/random/100x100/?portrait,person" />
+                        </div>
+                    </div>
+                    <span class="flex-1 text-left">知识运营专员</span>
+                    <i data-lucide="chevrons-up-down" class="w-4 h-4"></i>
+                </div>
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mb-2">
+                    <li><a href="javascript:void(0);" class="text-sm" onclick="showFrame('P_101_role_managment.html', '角色管理', this)" data-page-url="P_101_role_managment.html" data-page-name="角色管理"><i data-lucide="shield"></i>角色管理</a></li>
+                    <li><a href="javascript:void(0);" class="text-sm" onclick="showFrame('P_102_member_managment.html', '成员管理', this)" data-page-url="P_102_member_managment.html" data-page-name="成员管理"><i data-lucide="users"></i>成员管理</a></li>
+                    <li><a><i data-lucide="log-out"></i>退出登录</a></li>
+                </ul>
+            </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 右侧内容区 (iframe 容器) -->
+    <main class="drawer-content flex flex-col bg-base-100">
+      <div class="flex-1 p-0">
+        <iframe id="content-frame" src="" frameborder="0"></iframe>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const navLinksContainer = document.getElementById('navLinksContainer');
+    const contentFrame = document.getElementById('content-frame');
+    const mobilePageTitle = document.querySelector('.navbar .flex-1 .btn');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 初始化 Lucide 图标
+      lucide.createIcons();
+      
+      const firstLink = navLinksContainer.querySelector('a[data-page-url]');
+      if (firstLink) {
+        const initialUrl = firstLink.getAttribute('data-page-url');
+        const initialName = firstLink.getAttribute('data-page-name');
+        if(initialUrl && initialName){
+           showFrame(initialUrl, initialName, firstLink);
+        }
+      }
+    });
+
+    function showFrame(pageUrl, pageName, clickedLink) {
+      // 1. 更新 iframe 的 src
+      if (contentFrame) {
+        contentFrame.src = pageUrl;
+      }
+
+      // 2. 更新移动端标题
+      if (mobilePageTitle) {
+          mobilePageTitle.textContent = pageName;
+      }
+
+      // 3. 更新导航链接的激活状态
+      const navLinks = navLinksContainer.querySelectorAll('.menu a');
+      navLinks.forEach(link => {
+        link.classList.remove('active-nav-link');
+      });
+      if (clickedLink) {
+        clickedLink.classList.add('active-nav-link');
+      }
+    }
+  </script>
+</body>
+</html>
+<!-- END: index.html -->

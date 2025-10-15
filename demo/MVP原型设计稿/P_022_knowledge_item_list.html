@@ -1,0 +1,575 @@
+<!-- START: P_022_knowledge_item_list.html -->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P_022 - 知识条目列表页 (v2)</title>
+  <!-- Tailwind CSS & daisyUI -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    html { overflow-y: scroll; }
+    .dev-note-btn {
+      position: absolute;
+      transform: translate(50%, -50%);
+    }
+    /* 批量操作栏的平滑过渡 */
+    #bulk-action-bar {
+      transition: all 0.3s ease-in-out;
+    }
+    .dropdown-content li a {
+      word-wrap: normal;
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="bg-base-200 font-sans">
+
+  <div class="p-4 sm:p-6 md:p-8 min-h-screen">
+    <div class="max-w-full mx-auto">
+
+      <!-- 页面头部 -->
+      <header class="mb-6">
+        <div class="text-sm breadcrumbs">
+          <ul>
+            <li><a href="#"><i data-lucide="home" class="w-4 h-4"></i>&nbsp;知识库</a></li>
+            <li><a href="./P_021_document_list.html"><i data-lucide="book-marked" class="w-4 h-4"></i>&nbsp;产品A手册</a></li>
+            <li><i data-lucide="file-text" class="w-4 h-4"></i>&nbsp;安装指南.md</li>
+          </ul>
+        </div>
+        <div class="mt-2">
+            <h1 class="text-3xl font-bold text-base-content">📄 安装指南.md</h1>
+            <p class="text-base-content/70 mt-1">包含 150 个知识条目・最后更新于 2天前</p>
+        </div>
+      </header>
+
+      <!-- 操作与搜索栏 -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div class="form-control w-full md:w-auto md:max-w-xs relative">
+          <label class="input input-bordered flex items-center gap-2">
+            <input type="text" class="grow" placeholder="在150个条目中搜索..." />
+            <i data-lucide="search" class="w-4 h-4 opacity-70"></i>
+          </label>
+        </div>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button class="btn btn-primary w-full md:w-auto" onclick="openEditor('new')">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            新建知识条目
+          </button>
+          <div class="divider divider-horizontal"></div>
+          <div class="form-control relative">
+            <label class="cursor-pointer label">
+              <span class="label-text mr-2" id="doc-status-label">🟢 文档已启用</span>
+              <input type="checkbox" class="toggle toggle-success" id="doc-status-toggle" checked />
+            </label>
+            <button class="btn btn-xs btn-circle btn-accent dev-note-btn shadow-lg hover:scale-110 transition-transform" style="top:0; right:-1.5rem;" onclick="showDeveloperNote('note_doc_status_toggle', 'Note #4: 文档级状态切换')">4</button>
+          </div>
+          <div class="dropdown dropdown-end">
+            <button tabindex="0" role="button" class="btn btn-square btn-ghost">
+              <i data-lucide="more-vertical" class="w-5 h-5"></i>
+            </button>
+            <ul tabindex="0" class="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52">
+              <li><a><i data-lucide="edit-3" class="w-4 h-4"></i> 重命名文档</a></li>
+              <li><a><i data-lucide="trash-2" class="w-4 h-4 text-error"></i> 删除文档</a></li>
+            </ul>
+             <button class="btn btn-xs btn-circle btn-accent dev-note-btn shadow-lg hover:scale-110 transition-transform" style="top:0; right:0;" onclick="showDeveloperNote('note_doc_actions', 'Note #1: 文档级操作')">1</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 条件批量操作栏 -->
+      <div id="bulk-action-bar" class="bg-base-100 p-2 rounded-lg shadow-md mb-4 flex items-center gap-4 transform scale-95 opacity-0 -translate-y-2 hidden">
+        <span class="font-bold text-sm ml-2"><span id="selection-count">0</span> 已选择</span>
+        <div class="divider divider-horizontal"></div>
+        <button class="btn btn-sm btn-ghost"><i data-lucide="check-circle" class="w-4 h-4 text-success"></i>启用</button>
+        <button class="btn btn-sm btn-ghost"><i data-lucide="x-circle" class="w-4 h-4 text-warning"></i>禁用</button>
+        <button class="btn btn-sm btn-ghost"><i data-lucide="trash-2" class="w-4 h-4 text-error"></i>删除</button>
+        <div class="flex-grow"></div>
+        <button class="btn btn-sm btn-ghost" onclick="clearSelection()">取消</button>
+        <div class="absolute top-2 right-2">
+            <button class="btn btn-xs btn-circle btn-accent shadow-lg hover:scale-110 transition-transform" onclick="showDeveloperNote('note_bulk_actions', 'Note #2: 批量操作逻辑')">2</button>
+        </div>
+      </div>
+
+      <!-- 知识条目列表 (表格形式) -->
+      <div class="overflow-x-auto bg-base-100 rounded-lg shadow-md">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th class="w-12"><label><input type="checkbox" class="checkbox checkbox-primary" id="select-all-checkbox" /></label></th>
+              <th>内容片段</th>
+              <th class="w-32">状态</th>
+              <th class="w-40 text-right relative">
+                操作
+                <button class="btn btn-xs btn-circle btn-accent dev-note-btn shadow-lg hover:scale-110 transition-transform" style="top:1rem; right:-0.5rem;" onclick="showDeveloperNote('note_direct_actions', 'Note #3: 直接操作模式')">3</button>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="knowledge-item-list">
+            <!-- JS动态生成条目 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 分页 -->
+      <div class="flex justify-center mt-8">
+        <div class="join">
+          <button class="join-item btn">«</button>
+          <button class="join-item btn btn-active">1</button>
+          <button class="join-item btn">2</button>
+          <button class="join-item btn">...</button>
+          <button class="join-item btn">15</button>
+          <button class="join-item btn">»</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Container for Notifications -->
+  <div id="toast-container" class="toast toast-top toast-center z-[100]"></div>
+
+  <!-- Modals (reused from previous version) -->
+  <dialog id="item_editor_modal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box w-11/12 max-w-4xl">
+      <h3 id="editor_title" class="font-bold text-lg"></h3>
+      <textarea id="editor_content" class="textarea textarea-bordered !w-full h-64 my-4" placeholder="在此输入知识条目内容..."></textarea>
+      <div class="modal-action mt-4 items-center justify-between">
+        <small class="text-base-content/60">💡提示: 内容将立即同步至下游系统。</small>
+        <div>
+          <button class="btn btn-ghost mr-2" onclick="closeEditor()">取消</button>
+          <button id="editor_save_button" class="btn btn-primary">
+            <span class="loading loading-spinner loading-sm hidden"></span>
+            <span>✅ 保存并同步</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button type="button" onclick="closeEditor()">close</button></form>
+  </dialog>
+  
+  <dialog id="confirm_discard_modal" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">放弃更改?</h3>
+      <p class="py-4">您有未保存的更改，确定要放弃吗？</p>
+      <div class="modal-action">
+        <button class="btn" onclick="discardModal.close()">取消</button>
+        <button class="btn btn-error" onclick="forceCloseEditor()">放弃</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button onclick="discardModal.close()">close</button></form>
+  </dialog>
+
+  <dialog id="confirm_delete_modal" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg text-error"><i data-lucide="alert-triangle" class="inline-block w-5 h-5"></i> 确认删除</h3>
+      <p class="py-4">您确定要删除这个知识条目吗？此操作不可恢复。</p>
+      <div class="modal-action">
+        <button class="btn" onclick="document.getElementById('confirm_delete_modal').close()">取消</button>
+        <button class="btn btn-error" id="confirm-delete-btn">确认删除</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <!-- Modal: 开发者注释 (Developer Note) -->
+  <dialog id="developer_note_modal" class="modal modal-bottom sm:modal-middle">
+      <div class="modal-box prose">
+          <h3 id="developer_note_title" class="font-bold text-lg"></h3>
+          <div id="developer_note_content" class="py-4"></div>
+          <div class="modal-action">
+              <form method="dialog"><button class="btn">关闭</button></form>
+          </div>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <!-- 隐藏的开发者注释内容 -->
+  <div id="note_doc_actions" style="display:none;">
+    <h4>用户故事</h4>
+    <p>作为知识库管理员，我希望能直接在当前页面对整个文档进行重命名或删除，而不需要返回上一级列表，以提高管理效率。</p>
+    <h4>核心业务规则</h4>
+    <ul>
+      <li><strong>重命名:</strong> 点击后，页面主标题 (H1) 应变为可编辑状态。</li>
+      <li><strong>删除:</strong> 必须触发一个高风险操作的二次确认模态框，明确告知用户将删除整个文档及其包含的所有知识条目。</li>
+    </ul>
+  </div>
+  <div id="note_bulk_actions" style="display:none;">
+    <h4>用户故事</h4>
+    <p>作为内容维护者，我需要一次性启用或禁用多个相关的知识条目（例如，所有关于某个旧功能的条目），以快速响应产品迭代。</p>
+    <h4>核心业务规则</h4>
+    <ul>
+      <li>此操作栏仅在用户选中至少一个条目时才出现。</li>
+      <li>操作栏应平滑地出现和消失，而不是瞬间切换。</li>
+      <li>操作栏上显示的已选数量必须实时更新。</li>
+      <li>批量删除操作同样需要二次确认。</li>
+    </ul>
+  </div>
+  <div id="note_direct_actions" style="display:none;">
+    <h4>用户故事</h4>
+    <p>作为编辑，我需要快速地对单个知识条目进行微调（如修改错别字、切换其可用状态），我希望这些常用操作的入口始终可见，无需任何悬停或额外点击。</p>
+    <h4>核心业务规则</h4>
+    <ul>
+      <li><strong>状态切换 (🔛):</strong> 点击后应立即生效，无需二次确认，以便快速操作。UI状态（标签、样式）必须同步更新。</li>
+      <li><strong>编辑 (✏️):</strong> 点击后打开标准的知识条目编辑器模态框。</li>
+      <li><strong>删除 (🗑️):</strong> 必须有二次确认，防止误操作。这是系统的【容错性】原则体现。</li>
+    </ul>
+  </div>
+   <div id="note_doc_status_toggle" style="display:none;">
+    <h4>用户故事</h4>
+    <p>作为管理员，我希望能一键禁用整个文档的所有知识，以便进行集中修改，避免被AI调用。同样，我也希望能一键恢复。</p>
+    <h4>核心业务规则</h4>
+    <ul>
+      <li><strong>主控开关:</strong> 此开关为总闸。关闭时，所有条目强制禁用，且单个条目的开关失效。</li>
+      <li><strong>状态恢复:</strong> 重新打开总闸时，每个条目应恢复到它被总闸关闭前的各自状态。</li>
+      <li><strong>反向同步:</strong> 当总闸开启时，如果用户手动启用了任何一个条目，总闸必须自动保持/切换为开启状态。</li>
+    </ul>
+  </div>
+
+  <script>
+    // --- 初始数据和状态 ---
+    let knowledgeItems = [
+        { id: 1, content: '在安装前，请确保您的操作系统为 Windows 10 或更高版本，并且拥有管理员权限。', enabled: true, lastEnabledState: true },
+        { id: 2, content: '下载最新的 .exe 安装包，双击运行并按照向导提示操作。请确保勾选“添加到系统路径”。', enabled: true, lastEnabledState: true },
+        { id: 3, content: '首先，请确保您已安装 Homebrew。打开终端并运行 `brew install our-app`。此方法仅适用于macOS。', enabled: false, lastEnabledState: false },
+        { id: 4, content: '对于Linux用户，我们提供了AppImage包。下载后赋予其执行权限即可运行：`chmod +x our-app.AppImage`', enabled: true, lastEnabledState: true },
+        { id: 5, content: '旧版的配置文件位于 `~/.config/old-app`，新版将自动迁移。', enabled: false, lastEnabledState: false },
+    ];
+    let selectedItems = new Set();
+    let isDocumentEnabled = true;
+
+    // --- DOM 元素引用 ---
+    const listContainer = document.getElementById('knowledge-item-list');
+    const selectAllCheckbox = document.getElementById('select-all-checkbox');
+    const bulkActionBar = document.getElementById('bulk-action-bar');
+    const selectionCountEl = document.getElementById('selection-count');
+    const editorModal = document.getElementById('item_editor_modal');
+    const editorTitle = document.getElementById('editor_title');
+    const editorContent = document.getElementById('editor_content');
+    const saveButton = document.getElementById('editor_save_button');
+    const discardModal = document.getElementById('confirm_discard_modal');
+    const deleteModal = document.getElementById('confirm_delete_modal');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const docStatusToggle = document.getElementById('doc-status-toggle');
+    const docStatusLabel = document.getElementById('doc-status-label');
+    const toastContainer = document.getElementById('toast-container');
+
+    let isContentChanged = false;
+    let originalContent = '';
+    let itemToDelete = null;
+
+    // --- API 模拟与通知 ---
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'} shadow-lg`;
+        toast.innerHTML = `
+          <div class="flex items-center">
+            <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5 mr-2"></i>
+            <span>${message}</span>
+          </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        lucide.createIcons({ context: toast });
+
+        // Fade in animation
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        requestAnimationFrame(() => {
+            toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        });
+
+        // Fade out and remove
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function simulateApiCall(operation) {
+        console.log(`Simulating API call for: ${operation}`);
+        return new Promise((resolve, reject) => {
+            const success = Math.random() > 0.2; // 80% success rate
+            const delay = 400 + Math.random() * 600;
+
+            setTimeout(() => {
+                if (success) {
+                    console.log(`API call for ${operation} SUCCEEDED.`);
+                    resolve({ status: 'ok', message: '操作成功' });
+                } else {
+                    console.error(`API call for ${operation} FAILED.`);
+                    reject(new Error('网络错误：操作失败，请稍后重试。'));
+                }
+            }, delay);
+        });
+    }
+
+    // --- 渲染函数 ---
+    function renderList() {
+        listContainer.innerHTML = '';
+        knowledgeItems.forEach(item => {
+            const row = document.createElement('tr');
+            row.dataset.itemId = item.id;
+            const isItemDisabledByDoc = !isDocumentEnabled;
+            if (!item.enabled || isItemDisabledByDoc) {
+                row.classList.add('opacity-60');
+            }
+
+            const statusBadge = item.enabled && isDocumentEnabled
+                ? `<div class="badge badge-success badge-outline gap-1">🟢 已启用</div>`
+                : `<div class="badge badge-warning badge-outline gap-1">🔴 已禁用</div>`;
+            
+            const toggleIcon = item.enabled ? 'toggle-left' : 'toggle-right';
+
+            row.innerHTML = `
+                <td><label><input type="checkbox" class="checkbox checkbox-primary item-checkbox" data-id="${item.id}" ${selectedItems.has(item.id) ? 'checked' : ''} /></label></td>
+                <td class="cursor-pointer hover:bg-base-200" ondblclick="openEditor('edit', ${item.id})"><p class="text-sm text-base-content/80">${item.content}</p></td>
+                <td>${statusBadge}</td>
+                <td class="text-right space-x-1">
+                    <div class="tooltip" data-tip="切换状态">
+                        <button class="btn btn-xs btn-ghost" onclick="toggleStatus(${item.id})" ${isItemDisabledByDoc ? 'disabled' : ''}><i data-lucide="${toggleIcon}" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="tooltip" data-tip="编辑">
+                        <button class="btn btn-xs btn-ghost" onclick="openEditor('edit', ${item.id})"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="tooltip" data-tip="删除">
+                        <button class="btn btn-xs btn-ghost text-error" onclick="requestDelete(${item.id})"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </td>
+            `;
+            listContainer.appendChild(row);
+        });
+        lucide.createIcons();
+        updateBulkActionBar();
+        updateDocStatusUI();
+    }
+
+    // --- 交互逻辑 ---
+    function updateBulkActionBar() {
+        const count = selectedItems.size;
+        selectionCountEl.textContent = count;
+        if (count > 0) {
+            bulkActionBar.classList.remove('hidden');
+            setTimeout(() => bulkActionBar.classList.remove('scale-95', 'opacity-0', '-translate-y-2'), 10);
+        } else {
+            bulkActionBar.classList.add('scale-95', 'opacity-0', '-translate-y-2');
+            setTimeout(() => bulkActionBar.classList.add('hidden'), 300);
+        }
+        selectAllCheckbox.checked = count > 0 && count === knowledgeItems.length;
+    }
+
+    function clearSelection() {
+        selectedItems.clear();
+        renderList();
+    }
+
+    function toggleStatus(id) {
+        const item = knowledgeItems.find(i => i.id === id);
+        if (!item) return;
+
+        const originalState = item.enabled;
+        // Optimistic UI update
+        item.enabled = !originalState;
+        item.lastEnabledState = item.enabled;
+        if (item.enabled) {
+            isDocumentEnabled = true;
+        }
+        renderList();
+
+        simulateApiCall(`toggle status for item ${id}`)
+            .then(response => {
+                showToast(`状态更新成功`, 'success');
+            })
+            .catch(error => {
+                showToast(error.message, 'error');
+                // Rollback on failure
+                item.enabled = originalState;
+                item.lastEnabledState = originalState;
+                renderList();
+            });
+    }
+
+    function toggleDocumentStatus() {
+        isDocumentEnabled = !isDocumentEnabled;
+        if (isDocumentEnabled) {
+            knowledgeItems.forEach(item => item.enabled = item.lastEnabledState);
+        } else {
+            knowledgeItems.forEach(item => {
+                item.lastEnabledState = item.enabled;
+                item.enabled = false;
+            });
+        }
+        renderList();
+    }
+
+    function updateDocStatusUI() {
+        docStatusToggle.checked = isDocumentEnabled;
+        docStatusLabel.textContent = isDocumentEnabled ? '🟢 文档已启用' : '🔴 文档已禁用';
+        if (isDocumentEnabled) {
+            docStatusToggle.classList.remove('toggle-error');
+            docStatusToggle.classList.add('toggle-success');
+        } else {
+            docStatusToggle.classList.remove('toggle-success');
+            docStatusToggle.classList.add('toggle-error');
+        }
+    }
+    
+    function requestDelete(id) {
+        itemToDelete = id;
+        deleteModal.showModal();
+    }
+
+    confirmDeleteBtn.onclick = () => {
+        if (itemToDelete === null) return;
+
+        const btn = confirmDeleteBtn;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<span class="loading loading-spinner loading-sm"></span> 删除中...`;
+        btn.disabled = true;
+
+        simulateApiCall(`delete item ${itemToDelete}`)
+            .then(() => {
+                knowledgeItems = knowledgeItems.filter(i => i.id !== itemToDelete);
+                selectedItems.delete(itemToDelete);
+                showToast(`条目 #${itemToDelete} 已成功删除。`, 'success');
+                itemToDelete = null;
+                deleteModal.close();
+                renderList();
+            })
+            .catch(error => {
+                showToast(error.message, 'error');
+                deleteModal.close();
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    };
+
+    // --- 事件监听 ---
+    selectAllCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            knowledgeItems.forEach(item => selectedItems.add(item.id));
+        } else {
+            selectedItems.clear();
+        }
+        renderList();
+    });
+
+    listContainer.addEventListener('change', (e) => {
+        if (e.target.classList.contains('item-checkbox')) {
+            const id = parseInt(e.target.dataset.id, 10);
+            if (e.target.checked) {
+                selectedItems.add(id);
+            } else {
+                selectedItems.delete(id);
+            }
+            updateBulkActionBar();
+        }
+    });
+
+    docStatusToggle.addEventListener('change', toggleDocumentStatus);
+
+    // --- 编辑器 Modal 逻辑 ---
+    editorContent.addEventListener('input', () => {
+        isContentChanged = editorContent.value !== originalContent;
+    });
+
+    function openEditor(mode, itemId = null) {
+        let currentItem = null;
+        if (mode === 'edit' && itemId) {
+            currentItem = knowledgeItems.find(i => i.id === itemId);
+            editorTitle.textContent = '✍️ 编辑知识条目';
+            editorContent.value = currentItem ? currentItem.content : '';
+        } else {
+            editorTitle.textContent = '✍️ 新建知识条目';
+            editorContent.value = '';
+        }
+        originalContent = editorContent.value;
+        isContentChanged = false;
+        lucide.createIcons({ context: editorModal });
+        editorModal.showModal();
+
+        saveButton.onclick = () => {
+            const btn = saveButton;
+            const spinner = btn.querySelector('.loading');
+            const text = btn.querySelector('span:not(.loading)');
+            
+            spinner.classList.remove('hidden');
+            text.textContent = '保存中...';
+            btn.disabled = true;
+
+            const operation = mode === 'edit' ? `update item ${itemId}` : 'create new item';
+            simulateApiCall(operation)
+                .then(() => {
+                    if (mode === 'edit' && currentItem) {
+                        currentItem.content = editorContent.value;
+                        showToast(`条目 #${itemId} 已成功更新。`, 'success');
+                    } else {
+                        const newItem = { id: Date.now(), content: editorContent.value, enabled: true, lastEnabledState: true };
+                        knowledgeItems.unshift(newItem);
+                        showToast('新条目已成功创建。', 'success');
+                    }
+                    forceCloseEditor();
+                    renderList();
+                })
+                .catch(error => {
+                    showToast(error.message, 'error');
+                })
+                .finally(() => {
+                    spinner.classList.add('hidden');
+                    text.textContent = '✅ 保存并同步';
+                    btn.disabled = false;
+                });
+        };
+    }
+    
+    function closeEditor() {
+        if (isContentChanged) {
+            discardModal.showModal();
+        } else {
+            forceCloseEditor();
+        }
+    }
+
+    function forceCloseEditor() {
+        discardModal.close();
+        editorModal.close();
+    }
+
+    editorModal.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closeEditor();
+    });
+
+    // --- 开发者注释功能 ---
+    function showDeveloperNote(noteContentId, noteTitle) {
+        const titleEl = document.getElementById('developer_note_title');
+        const contentEl = document.getElementById('developer_note_content');
+        const noteSourceEl = document.getElementById(noteContentId);
+        const modal = document.getElementById('developer_note_modal');
+
+        if (titleEl && contentEl && noteSourceEl && modal) {
+            titleEl.textContent = noteTitle;
+            contentEl.innerHTML = noteSourceEl.innerHTML;
+            lucide.createIcons({ context: contentEl });
+            modal.showModal();
+        }
+    }
+
+    // --- 初始化 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderList();
+    });
+  </script>
+
+</body>
+</html>
+<!-- END: P_022_knowledge_item_list.html -->

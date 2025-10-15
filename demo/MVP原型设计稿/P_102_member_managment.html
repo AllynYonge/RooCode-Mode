@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成员管理 - 原型</title>
+
+    <!-- Tailwind CSS v4 (必需) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- daisyUI v5 (必需) -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+
+    <!-- Lucide Icons (推荐图标库) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        html {
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+
+<body class="bg-base-200 font-sans">
+
+    <!-- 主布局容器 -->
+    <div class="flex h-screen">
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <main class="p-4 sm:p-6 lg:p-8 flex-1">
+
+                <!-- 页面头部 -->
+                <header class="mb-6">
+                    <!-- 面包屑导航 -->
+                    <div class="text-sm breadcrumbs mb-2">
+                        <ul>
+                            <li><a><i data-lucide="home" class="w-4 h-4 mr-1"></i>主页</a></li>
+                            <li><a><i data-lucide="settings" class="w-4 h-4 mr-1"></i>系统设置</a></li>
+                            <li><span class="font-semibold text-primary"><i data-lucide="users" class="w-4 h-4 mr-1"></i>成员管理</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- 标题与操作区 -->
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
+                            <span class="text-primary">👥</span>
+                            成员管理
+                        </h1>
+                        
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                           <div class="relative">
+                                <button class="btn btn-primary" onclick="add_member_modal.showModal()">
+                                   <i data-lucide="plus" class="w-4 h-4"></i>
+                                   新增成员
+                               </button>
+                               <!-- Developer Note Tip -->
+                               <button class="btn btn-xs btn-circle btn-accent absolute -top-2 -right-2 z-10 shadow-lg hover:scale-110 transition-transform" onclick="showDeveloperNote('note_add_member', 'Note #1: 新增成员业务逻辑')">1</button>
+                           </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- 列表式管理面板 -->
+                <div class="bg-base-100 p-6 rounded-box shadow">
+                    <!-- 操作区 -->
+                    <div class="flex flex-col md:flex-row gap-2 justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <label class="input input-bordered flex items-center gap-2 w-full md:w-auto">
+                                <input type="text" class="grow" placeholder="按姓名或邮箱搜索..." />
+                                <i data-lucide="search" class="w-4 h-4 opacity-70"></i>
+                            </label>
+                            <select class="select select-bordered w-full md:w-auto">
+                                <option disabled selected>按角色筛选</option>
+                                <option>系统管理员</option>
+                                <option>知识库管理员</option>
+                                <option>知识库运营专员</option>
+                                <option>普通成员</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 成员列表 -->
+                    <div class="overflow-x-auto">
+                        <table class="table">
+                            <!-- head -->
+                            <thead>
+                                <tr>
+                                    <th>用户</th>
+                                    <th>邮箱</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- row 1 -->
+                                <tr>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            <div class="avatar placeholder">
+                                                <div class="bg-neutral text-neutral-content rounded-full w-10">
+                                                    <span>张三</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold">张三</div>
+                                                <div class="text-sm opacity-50">zhangsan</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>zhang.san@example.com</td>
+                                    <td>
+                                        <select class="select select-ghost select-sm">
+                                            <option>知识库管理员</option>
+                                            <option selected>系统管理员</option>
+                                            <option>普通成员</option>
+                                        </select>
+                                    </td>
+                                    <td><span class="badge badge-ghost badge-sm">已激活</span></td>
+                                    <td>
+                                        <button class="btn btn-ghost btn-xs">移除</button>
+                                    </td>
+                                </tr>
+                                <!-- row 2 -->
+                                <tr>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            <div class="avatar placeholder">
+                                                <div class="bg-primary text-primary-content rounded-full w-10">
+                                                    <span>李四</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold">李四</div>
+                                                <div class="text-sm opacity-50">lisi</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>li.si@example.com</td>
+                                    <td>
+                                        <select class="select select-ghost select-sm">
+                                            <option selected>知识库运营专员</option>
+                                            <option>系统管理员</option>
+                                            <option>普通成员</option>
+                                        </select>
+                                    </td>
+                                    <td><span class="badge badge-ghost badge-sm">已激活</span></td>
+                                    <td>
+                                        <button class="btn btn-ghost btn-xs">移除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                     <!-- 分页 -->
+                    <footer class="mt-4 flex items-center justify-between">
+                        <div class="text-sm text-base-content/60">
+                            显示第 <span class="font-semibold text-base-content">1-10</span> 条，共 <span class="font-semibold text-base-content">23</span> 条
+                        </div>
+                        <div class="join">
+                            <button class="join-item btn btn-sm">«</button>
+                            <button class="join-item btn btn-sm btn-active">1</button>
+                            <button class="join-item btn btn-sm">2</button>
+                            <button class="join-item btn btn-sm">3</button>
+                            <button class="join-item btn btn-sm">»</button>
+                        </div>
+                    </footer>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 新增成员 Modal -->
+    <dialog id="add_member_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-primary"></i>新增成员</h3>
+            <form class="py-4 space-y-4">
+                <div>
+                    <label class="label">
+                        <span class="label-text">成员邮箱</span>
+                    </label>
+                    <input type="email" placeholder="例如：name@example.com" class="input input-bordered w-full" />
+                </div>
+                <div>
+                    <label class="label">
+                        <span class="label-text">初始密码</span>
+                    </label>
+                    <input type="password" placeholder="设置一个初始密码" class="input input-bordered w-full" />
+                </div>
+                <div>
+                    <label class="label">
+                        <span class="label-text">分配初始角色</span>
+                    </label>
+                    <select class="select select-bordered w-full">
+                        <option disabled selected>请选择一个初始角色</option>
+                        <option>系统管理员</option>
+                        <option>知识库管理员</option>
+                        <option>知识库运营专员</option>
+                        <option>普通成员</option>
+                    </select>
+                </div>
+            </form>
+            <div class="modal-action">
+                <form method="dialog" class="w-full flex justify-end gap-2">
+                    <button class="btn btn-ghost">取消</button>
+                    <button class="btn btn-primary">确认新增</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>关闭</button></form>
+    </dialog>
+
+   <!-- Developer Note Modal (Shared) -->
+   <dialog id="developer_note_modal" class="modal modal-bottom sm:modal-middle">
+       <div class="modal-box prose">
+           <h3 id="developer_note_title" class="font-bold text-lg"></h3>
+           <div id="developer_note_content" class="py-4"></div>
+           <div class="modal-action">
+               <form method="dialog">
+                   <button class="btn">关闭</button>
+               </form>
+           </div>
+       </div>
+       <form method="dialog" class="modal-backdrop"><button>关闭</button></form>
+   </dialog>
+
+   <!-- Developer Note Content Blocks (Hidden) -->
+   <div id="note_add_member" class="hidden">
+       <h4>用户目标 (User Story)</h4>
+       <p>作为系统管理员，我需要能够直接为新同事创建一个系统账号，以便他们可以立即开始使用系统，而无需经过繁琐的自助注册流程。</p>
+       
+       <h4>核心业务规则 (Business Rules)</h4>
+       <ul>
+           <li><strong>唯一性:</strong> 用于创建账号的邮箱地址在系统中必须是唯一的。</li>
+           <li><strong>初始凭证:</strong> 必须为新成员设置一个初始密码，供其首次登录使用。</li>
+           <li><strong>权限分配:</strong> 必须在创建时为新成员分配一个初始角色，以决定其在系统中的访问权限。</li>
+       </ul>
+
+       <h4>边界情况 (Edge Cases)</h4>
+       <ul>
+           <li><strong>邮箱已存在:</strong> 如果输入的邮箱地址已经被其他成员使用，系统应在模态框内给出清晰的、不允许提交的错误提示。</li>
+           <li><strong>数据格式无效:</strong> 对邮箱格式进行前端校验，不符合格式则提示错误。</li>
+           <li><strong>服务端错误:</strong> 如果后端在创建过程中遇到问题（如数据库连接失败），应在提交后通过Toast消息向管理员显示一个通用的失败通知。</li>
+       </ul>
+   </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Developer Notes Functionality
+        const developerNoteModal = document.getElementById('developer_note_modal');
+        const developerNoteTitle = document.getElementById('developer_note_title');
+        const developerNoteContent = document.getElementById('developer_note_content');
+
+        function showDeveloperNote(noteContentId, noteTitle) {
+            const noteContentElement = document.getElementById(noteContentId);
+            if (developerNoteModal && noteContentElement && developerNoteTitle && developerNoteContent) {
+                developerNoteTitle.textContent = noteTitle;
+                developerNoteContent.innerHTML = noteContentElement.innerHTML;
+                developerNoteModal.showModal();
+            } else {
+                console.error('Developer note elements not found!');
+            }
+        }
+    </script>
+
+</body>
+</html>
